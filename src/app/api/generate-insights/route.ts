@@ -33,7 +33,7 @@ export async function POST(req: Request, res: Response) {
       callSummaries,
       interview.name,
       interview.objective,
-      interview.description,
+      interview.description
     );
 
     const baseCompletion = await openai.chat.completions.create({
@@ -57,7 +57,7 @@ export async function POST(req: Request, res: Response) {
 
     await InterviewService.updateInterview(
       { insights: insightsResponse.insights },
-      body.interviewId,
+      body.interviewId
     );
 
     logger.info("Insights generated successfully");
@@ -66,14 +66,14 @@ export async function POST(req: Request, res: Response) {
       {
         response: content,
       },
-      { status: 200 },
+      { status: 200 }
     );
   } catch (error) {
     logger.error("Error generating insights");
 
     return NextResponse.json(
       { error: "internal server error" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

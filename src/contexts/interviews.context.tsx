@@ -38,7 +38,7 @@ export function InterviewProvider({ children }: InterviewProviderProps) {
       setInterviewsLoading(true);
       const response = await InterviewService.getAllInterviews(
         user?.id as string,
-        organization?.id as string,
+        organization?.id as string
       );
       setInterviewsLoading(false);
       setInterviews(response);

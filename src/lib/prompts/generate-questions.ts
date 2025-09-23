@@ -6,27 +6,58 @@ export const generateQuestionsPrompt = (body: {
   objective: string;
   number: number;
   context: string;
-}) => `Imagine you are an interviewer specialized in designing interview questions to help hiring managers find candidates with strong technical expertise and project experience, making it easier to identify the ideal fit for the role.
-              
+  jdText?: string;
+  cvText?: string;
+  pastNotes?: string;
+}) => `You are an interviewer specialized in designing structured screening questions that help hiring managers evaluate both human and technical aspects of candidates.
+
 Interview Title: ${body.name}
 Interview Objective: ${body.objective}
+Number of NEW questions to generate: ${body.number}
 
-Number of questions to be generated: ${body.number}
+CONTEXT TO USE (if provided):
+- Job Description (JD): ${body.jdText ?? "N/A"}
+- Candidate CV (verbatim text): ${body.cvText ?? "N/A"}
+- Past Interview Notes: ${body.pastNotes ?? "N/A"}
+- Additional info: ${body.context}
 
-Follow these detailed guidelines when crafting the questions:
-- Focus on evaluating the candidate's technical knowledge and their experience working on relevant projects. Questions should aim to gauge depth of expertise, problem-solving ability, and hands-on project experience. These aspects carry the most weight.
-- Include questions designed to assess problem-solving skills through practical examples. For instance, how the candidate has tackled challenges in previous projects, and their approach to complex technical issues.
-- Soft skills such as communication, teamwork, and adaptability should be addressed, but given less emphasis compared to technical and problem-solving abilities.
-- Maintain a professional yet approachable tone, ensuring candidates feel comfortable while demonstrating their knowledge.
-- Ask concise and precise open-ended questions that encourage detailed responses. Each question should be 30 words or less for clarity.
+GOALS
+- Automate the initial HR screening to capture essential candidate insights.
+- Cover BOTH:
+  a) HR dimensions: growth mindset, business thinking, critical thinking, posture & communication, motivation, cultural fit.
+  b) Technical depth (if JD is technical), problem-solving ability, and project experience.
+- Questions must feel conversational, open-ended, and relevant to the candidate’s profile and JD.
 
-Use the following context to generate the questions:
-${body.context}
+GUIDELINES
+1) Generate exactly ${body.number} open-ended questions (≤ 30 words each).
+2) Include a mix of:
+   - HR-focused screening questions (career goals, adaptability, motivation, culture, decision-making).
+   - JD/CV-tailored technical or project-related questions (only if JD is technical).
+3) Avoid duplicates of fixed questions or simple CV facts unless clarification is required.
+4) Maintain a professional but approachable tone.
+5) Ensure the set of questions collectively covers the SPARC dimensions:
+   - growthMindset
+   - businessThinking
+   - criticalThinking
+   - postureCommunication
+   - aiLiteracy
+   - techDepth (ONLY if the JD is technical)
 
-Moreover generate a 50 word or less second-person description about the interview to be shown to the user. It should be in the field 'description'.
-Do not use the exact objective in the description. Remember that some details are not be shown to the user. It should be a small description for the
-user to understand what the content of the interview would be. Make sure it is clear to the respondent who's taking the interview.
+OUTPUT FORMAT (STRICT)
+- Return a single JSON object with at least the keys "questions" and "description".
+- "questions" MUST be an array of objects with ONLY the key "question".
+  Example: { "questions": [ { "question": "..." }, ... ], "description": "..." }
+- "description" MUST be a second-person, ≤ 50-word blurb telling the candidate what this screening interview will cover, without copying the exact objective text.
+- You MAY include an optional "sparc_plan" array to map each question to intended SPARC dimensions:
+  "sparc_plan": [
+    { "index": 0, "dims": ["growthMindset","businessThinking"] },
+    ...
+  ]
+  Where "index" refers to the zero-based index within the returned "questions" array.
 
-The field 'questions' should take the format of an array of objects with the following key: question. 
-
-Strictly output only a JSON object with the keys 'questions' and 'description'.`;
+NOW PRODUCE:
+- Exactly ${
+  body.number
+} questions blending HR + JD-based technical focus as described.
+- Then produce "description".
+- Optionally include "sparc_plan" as described.`;

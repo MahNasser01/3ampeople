@@ -41,17 +41,18 @@ function DetailsPopup({
   const [interviewerDetails, setInterviewerDetails] = useState<Interviewer>();
 
   const [name, setName] = useState(interviewData.name);
+  const [jobDescription, setJobDescription] = useState("");
   const [selectedInterviewer, setSelectedInterviewer] = useState(
-    interviewData.interviewer_id,
+    interviewData.interviewer_id
   );
   const [objective, setObjective] = useState(interviewData.objective);
   const [isAnonymous, setIsAnonymous] = useState<boolean>(
-    interviewData.is_anonymous,
+    interviewData.is_anonymous
   );
   const [numQuestions, setNumQuestions] = useState(
     interviewData.question_count == 0
       ? ""
-      : String(interviewData.question_count),
+      : String(interviewData.question_count)
   );
   const [duration, setDuration] = useState(interviewData.time_duration);
   const [uploadedDocumentContext, setUploadedDocumentContext] = useState("");
@@ -82,11 +83,11 @@ function DetailsPopup({
 
     const generatedQuestions = (await axios.post(
       "/api/generate-interview-questions",
-      data,
+      data
     )) as any;
 
     const generatedQuestionsResponse = JSON.parse(
-      generatedQuestions?.data?.response,
+      generatedQuestions?.data?.response
     );
 
     const updatedQuestions = generatedQuestionsResponse.questions.map(
@@ -94,7 +95,7 @@ function DetailsPopup({
         id: uuidv4(),
         question: question.question.trim(),
         follow_up_count: 1,
-      }),
+      })
     );
 
     const updatedInterviewData = {
@@ -107,6 +108,7 @@ function DetailsPopup({
       time_duration: duration,
       description: generatedQuestionsResponse.description,
       is_anonymous: isAnonymous,
+      jd: jobDescription,
     };
     setInterviewData(updatedInterviewData);
   };
@@ -124,6 +126,7 @@ function DetailsPopup({
       time_duration: String(duration),
       description: "",
       is_anonymous: isAnonymous,
+      jd: jobDescription,
     };
     setInterviewData(updatedInterviewData);
   };
@@ -143,8 +146,12 @@ function DetailsPopup({
   return (
     <>
       <div className="text-center w-[38rem]">
-        <h1 className="text-2xl font-bold text-gray-800 mb-2">Create an Interview</h1>
-        <p className="text-sm text-gray-600 mb-6">Set up your interview details and preferences</p>
+        <h1 className="text-2xl font-bold text-gray-800 mb-2">
+          Create an Interview
+        </h1>
+        <p className="text-sm text-gray-600 mb-6">
+          Set up your interview details and preferences
+        </p>
         <div className="flex flex-col justify-center items-start mt-4 ml-10 mr-8">
           <div className="flex flex-row justify-center items-center">
             <h3 className="text-sm font-medium">Interview Name:</h3>
@@ -217,7 +224,15 @@ function DetailsPopup({
               <></>
             )}
           </div>
-          <h3 className="text-sm font-medium">Objective:</h3>
+          <h3 className="text-sm font-medium">Job Description:</h3>
+          <Textarea
+            value={jobDescription}
+            className="h-24 mt-2 border-2 border-gray-300 focus:border-orange-500 w-[33.2rem] rounded-lg transition-colors duration-200 bg-orange-50/30"
+            placeholder="Describe the daily duties and key objectives for this role"
+            onChange={(e) => setJobDescription(e.target.value)}
+            onBlur={(e) => setJobDescription(e.target.value.trim())}
+          />
+          <h3 className="mt-3 text-sm font-medium">Objective:</h3>
           <Textarea
             value={objective}
             className="h-24 mt-2 border-2 border-gray-300 focus:border-orange-500 w-[33.2rem] rounded-lg transition-colors duration-200 bg-orange-50/30"
@@ -262,7 +277,7 @@ function DetailsPopup({
               <input
                 type="number"
                 step="1"
-                max="5"
+                max="15"
                 min="1"
                 className="border-b-2 text-center focus:outline-none focus:border-orange-500 border-gray-300 w-14 px-2 py-1 ml-3 transition-colors duration-200 rounded-t-md bg-orange-50/30"
                 value={numQuestions}
@@ -272,8 +287,8 @@ function DetailsPopup({
                     value === "" ||
                     (Number.isInteger(Number(value)) && Number(value) > 0)
                   ) {
-                    if (Number(value) > 5) {
-                      value = "5";
+                    if (Number(value) > 15) {
+                      value = "15";
                     }
                     setNumQuestions(value);
                   }
@@ -285,7 +300,7 @@ function DetailsPopup({
               <input
                 type="number"
                 step="1"
-                max="10"
+                max="60"
                 min="1"
                 className="border-b-2 text-center focus:outline-none focus:border-orange-500 border-gray-300 w-14 px-2 py-1 ml-3 transition-colors duration-200 rounded-t-md bg-orange-50/30"
                 value={duration}
@@ -295,8 +310,8 @@ function DetailsPopup({
                     value === "" ||
                     (Number.isInteger(Number(value)) && Number(value) > 0)
                   ) {
-                    if (Number(value) > 10) {
-                      value = "10";
+                    if (Number(value) > 60) {
+                      value = "60";
                     }
                     setDuration(value);
                   }

@@ -5,21 +5,45 @@ export const SYSTEM_PROMPT = `You are an expert in analyzing communication skill
 
 export const getCommunicationAnalysisPrompt = (
   transcript: string,
-) => `Analyze the communication skills demonstrated in the following interview transcript:
+) => `Analyze the communication skills demonstrated in the following interview transcript.
 
-Transcript: ${transcript}
+Transcript:
+${transcript}
 
-Please provide your analysis in the following JSON format:
+TASK
+- Evaluate verbal clarity, tone, listening, conciseness, professionalism, and adaptability.
+- Assign a "communicationScore" from 0–10 (higher = better).
+- Provide overall feedback: 2–3 sentences.
+- Identify supporting quotes (<= 25 words each) with brief analysis, marking them as "strength" or "improvement_area".
+- List distinct "strengths" and "improvementAreas" in plain, actionable language.
+
+SPARC DIMENSION
+This analysis corresponds to the SPARC dimension "postureCommunication".
+Optionally include a "sparc_breakdown" field: { "dim": "postureCommunication", "score": X, "rationale": "..." }
+
+OUTPUT FORMAT (STRICT JSON)
 {
-  "communicationScore": number, // Score from 0-10 based on the standard communication scoring system
-  "overallFeedback": string,   // 2-3 sentence summary of communication skills
-  "supportingQuotes": [        // Array of relevant quotes with analysis
+  "communicationScore": number,        // 0–10
+  "overallFeedback": string,           // 2–3 sentence summary
+  "supportingQuotes": [
     {
-      "quote": string,         // The exact quote from the transcript
-      "analysis": string,      // Brief analysis of what this quote demonstrates about communication skills
-      "type": string          // Either "strength" or "improvement_area"
+      "quote": string,                 // exact transcript text (<= 25 words)
+      "analysis": string,              // short analysis
+      "type": "strength" | "improvement_area"
     }
   ],
-  "strengths": [string],       // List of communication strengths demonstrated
-  "improvementAreas": [string] // List of areas where communication could be improved
-}`;
+  "strengths": [string],               // key strengths in plain language
+  "improvementAreas": [string],        // improvement opportunities
+  "sparc_dimension": "postureCommunication",
+  "sparc_breakdown": {
+    "dim": "postureCommunication",
+    "score": number,                   // same scale, 0–10
+    "rationale": string                // 1–2 sentence explanation
+  }
+}
+
+CONSTRAINTS
+- Always return valid JSON.
+- "sparc_dimension" and "sparc_breakdown" are OPTIONAL; omit if not needed.
+- Keep all strings concise and actionable.`
+;

@@ -16,7 +16,7 @@ export async function POST(req: Request) {
     if (!transcript) {
       return NextResponse.json(
         { error: "Transcript is required" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -47,14 +47,14 @@ export async function POST(req: Request) {
 
     return NextResponse.json(
       { analysis: JSON.parse(analysis || "{}") },
-      { status: 200 },
+      { status: 200 }
     );
   } catch (error) {
     logger.error("Error analyzing communication skills");
 
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
