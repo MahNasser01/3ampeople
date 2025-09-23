@@ -38,6 +38,7 @@ import { CandidateStatus } from "@/lib/enum";
 import { ArrowLeft } from "lucide-react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import CustomAudioPlayer from "./customAudio";
+import { SPARCScoreCard } from "./sparcScoreCard";
 
 type CallProps = {
   call_id: string;
@@ -91,7 +92,7 @@ function CallInfo({
   }, [call_id]);
 
   useEffect(() => {
-    console.log('load video')
+    console.log("load video");
     // Load latest cheat_file video for this call
     const loadVideo = async () => {
       try {
@@ -106,7 +107,16 @@ function CallInfo({
           setVideoUrl(data[0].file_path as string);
           const r = (data[0] as any).result;
           if (r) {
-            const parsed = typeof r === "string" ? (() => { try { return JSON.parse(r); } catch { return null; } })() : r;
+            const parsed =
+              typeof r === "string"
+                ? (() => {
+                    try {
+                      return JSON.parse(r);
+                    } catch {
+                      return null;
+                    }
+                  })()
+                : r;
             if (
               parsed &&
               typeof parsed.gaze_direction === "number" &&
@@ -248,7 +258,7 @@ function CallInfo({
                         setCandidateStatus(newValue);
                         await ResponseService.updateResponse(
                           { candidate_status: newValue },
-                          call_id,
+                          call_id
                         );
                         onCandidateStatusChange(call_id, newValue);
                       }}
@@ -320,53 +330,55 @@ function CallInfo({
                   </div>
                 </div>
                 <div className="flex flex-col mt-3">
-  <p className="font-semibold text-lg text-gray-800 mb-3">
-    Interview Recording
-  </p>
+                  <p className="font-semibold text-lg text-gray-800 mb-3">
+                    Interview Recording
+                  </p>
 
-  <div className="flex flex-col md:flex-row gap-6">
-    {/* 🎙️ Audio Recording */}
-    {call?.recording_url && (
-      <div className="flex flex-col items-center bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 rounded-2xl shadow-md p-4 w-full md:w-1/2">
-        <p className="font-medium text-sm mb-3 text-orange-700">Audio</p>
-        <CustomAudioPlayer
-          src={call?.recording_url}
-        />
-      </div>
-    )}
+                  <div className="flex flex-col md:flex-row gap-6">
+                    {/* 🎙️ Audio Recording */}
+                    {call?.recording_url && (
+                      <div className="flex flex-col items-center bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 rounded-2xl shadow-md p-4 w-full md:w-1/2">
+                        <p className="font-medium text-sm mb-3 text-orange-700">
+                          Audio
+                        </p>
+                        <CustomAudioPlayer src={call?.recording_url} />
+                      </div>
+                    )}
 
-    {/* 🎥 Video Recording */}
-    {videoUrl && (
-      <div className="flex flex-col items-center bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 rounded-2xl shadow-md p-4 w-full md:w-1/2">
-        <p className="font-medium text-sm mb-3 text-orange-700">Video</p>
-        <video
-          src={videoUrl}
-          controls
-          className="w-full max-h-72 rounded-xl border border-orange-300 shadow-lg accent-orange-500"
-        />
-      </div>
-    )}
-  </div>
+                    {/* 🎥 Video Recording */}
+                    {videoUrl && (
+                      <div className="flex flex-col items-center bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 rounded-2xl shadow-md p-4 w-full md:w-1/2">
+                        <p className="font-medium text-sm mb-3 text-orange-700">
+                          Video
+                        </p>
+                        <video
+                          src={videoUrl}
+                          className="w-full max-h-72 rounded-xl border border-orange-300 shadow-lg accent-orange-500"
+                          controls
+                        />
+                      </div>
+                    )}
+                  </div>
 
-  {/* 📥 Download */}
-  {(videoUrl || call?.recording_url) && (
-    <div className="flex justify-end mt-5">
-      <a
-        href={videoUrl || call?.recording_url}
-        download
-        aria-label="Download"
-      >
-        <Button
-          variant="outline"
-          className="flex items-center gap-2 rounded-full border-orange-400 text-orange-600 hover:bg-orange-50 shadow-sm"
-        >
-          <DownloadIcon size={18} />
-          <span>Download Recording</span>
-        </Button>
-      </a>
-    </div>
-  )}
-</div>
+                  {/* 📥 Download */}
+                  {(videoUrl || call?.recording_url) && (
+                    <div className="flex justify-end mt-5">
+                      <a
+                        href={videoUrl || call?.recording_url}
+                        aria-label="Download"
+                        download
+                      >
+                        <Button
+                          variant="outline"
+                          className="flex items-center gap-2 rounded-full border-orange-400 text-orange-600 hover:bg-orange-50 shadow-sm"
+                        >
+                          <DownloadIcon size={18} />
+                          <span>Download Recording</span>
+                        </Button>
+                      </a>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
             {/* <div>{call.}</div> */}
@@ -374,7 +386,9 @@ function CallInfo({
           <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-3xl min-h-[120px] p-6 my-6 border border-orange-200 shadow-xl">
             <div className="flex items-center gap-2 mb-6">
               <div className="w-2 h-2 bg-orange-400 rounded-full" />
-              <h2 className="text-xl font-bold text-gray-800">General Summary</h2>
+              <h2 className="text-xl font-bold text-gray-800">
+                General Summary
+              </h2>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -446,30 +460,48 @@ function CallInfo({
                   </div>
                 </div>
               )}
-            {cheatResult && (
-              <div className="flex flex-col gap-4 text-sm p-6 rounded-3xl bg-white/80 backdrop-blur-sm border border-orange-100 shadow-lg">
-                <div className="flex flex-row gap-2 align-middle">
-                  <p className="font-medium my-auto text-xl">Proctoring</p>
+              {cheatResult && (
+                <div className="flex flex-col gap-4 text-sm p-6 rounded-3xl bg-white/80 backdrop-blur-sm border border-orange-100 shadow-lg">
+                  <div className="flex flex-row gap-2 align-middle">
+                    <p className="font-medium my-auto text-xl">Proctoring</p>
+                  </div>
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium">
+                        Mobile Detected:
+                      </span>
+                      <span
+                        className={`${
+                          cheatResult.mobile_detected === 1
+                            ? "text-red-500"
+                            : "text-green-500"
+                        } text-xl`}
+                      >
+                        ●
+                      </span>
+                      <span className="text-sm">
+                        {cheatResult.mobile_detected > 5 ? "Yes" : "No"}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium">
+                        Gaze Direction:
+                      </span>
+                      <span className="text-sm">
+                        {cheatResult.gaze_direction}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium">
+                        Head Direction:
+                      </span>
+                      <span className="text-sm">
+                        {cheatResult.head_direction}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex flex-col gap-3">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium">Mobile Detected:</span>
-                    <span className={`${cheatResult.mobile_detected === 1 ? "text-red-500" : "text-green-500"} text-xl`}>
-                      ●
-                    </span>
-                    <span className="text-sm">{cheatResult.mobile_detected > 5 ? "Yes" : "No"}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium">Gaze Direction:</span>
-                    <span className="text-sm">{cheatResult.gaze_direction}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium">Head Direction:</span>
-                    <span className="text-sm">{cheatResult.head_direction}</span>
-                  </div>
-                </div>
-              </div>
-            )}
+              )}
               <div className="flex flex-col gap-4 text-sm p-6 rounded-3xl bg-white/80 backdrop-blur-sm border border-orange-100 shadow-lg">
                 <div className="flex flex-row gap-2  align-middle">
                   <p className="my-auto">User Sentiment: </p>
@@ -486,10 +518,10 @@ function CallInfo({
                       call?.call_analysis?.user_sentiment == "Neutral"
                         ? "text-yellow-500"
                         : call?.call_analysis?.user_sentiment == "Negative"
-                          ? "text-red-500"
-                          : call?.call_analysis?.user_sentiment == "Positive"
-                            ? "text-green-500"
-                            : "text-transparent"
+                        ? "text-red-500"
+                        : call?.call_analysis?.user_sentiment == "Positive"
+                        ? "text-green-500"
+                        : "text-transparent"
                     } text-xl`}
                   >
                     ●
@@ -517,7 +549,9 @@ function CallInfo({
               <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-3xl min-h-[120px] p-6 my-6 border border-orange-200 shadow-xl">
                 <div className="flex items-center gap-2 mb-6">
                   <div className="w-2 h-2 bg-orange-400 rounded-full" />
-                  <h2 className="text-xl font-bold text-gray-800">Question Summary</h2>
+                  <h2 className="text-xl font-bold text-gray-800">
+                    Question Summary
+                  </h2>
                 </div>
                 <ScrollArea className="rounded-2xl h-72 text-sm py-3 leading-6 overflow-y-scroll whitespace-pre-line px-2 bg-white/60 backdrop-blur-sm border border-orange-100">
                   {analytics?.questionSummaries.map((qs, index) => (
@@ -528,6 +562,30 @@ function CallInfo({
                       answer={qs.summary}
                     />
                   ))}
+                </ScrollArea>
+              </div>
+            )}
+          {/* SPARC Breakdown */}
+          {analytics?.sparc_breakdown &&
+            analytics.sparc_breakdown.length > 0 && (
+              <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-3xl min-h-[120px] p-6 my-6 border border-indigo-200 shadow-xl">
+                <div className="flex items-center gap-2 mb-6">
+                  <div className="w-2 h-2 bg-indigo-400 rounded-full" />
+                  <h2 className="text-xl font-bold text-gray-800">
+                    SPARC Breakdown
+                  </h2>
+                </div>
+
+                <ScrollArea className="rounded-2xl h-72 text-sm py-3 leading-6 overflow-y-scroll whitespace-pre-line px-2 bg-white/60 backdrop-blur-sm border border-indigo-100">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pr-2">
+                    {analytics.sparc_breakdown.map((item, i) => (
+                      <SPARCScoreCard
+                        key={`${item.dim}-${i}`}
+                        item={item}
+                        index={i}
+                      />
+                    ))}
+                  </div>
                 </ScrollArea>
               </div>
             )}

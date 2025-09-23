@@ -15,12 +15,10 @@ export async function POST(req: Request, res: Response) {
   const responses = await ResponseService.getAllResponses(body.interviewId);
   const interview = await InterviewService.getInterviewById(body.interviewId);
 
-  let callSummaries = "";
-  if (responses) {
-    responses.forEach((response) => {
-      callSummaries += response.details?.call_analysis?.call_summary;
-    });
-  }
+  const callSummaries = (responses ?? []).reduce(
+    (acc, curr) => acc + curr.details?.call_analysis?.call_summary,
+    ""
+  );
 
   const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,

@@ -5,7 +5,7 @@ export const generateQuestionsPrompt = (body: {
   name: string;
   objective: string;
   number: number;
-  context: string;
+  context?: string;
   jdText?: string;
   cvText?: string;
   pastNotes?: string;
@@ -19,7 +19,7 @@ CONTEXT TO USE (if provided):
 - Job Description (JD): ${body.jdText ?? "N/A"}
 - Candidate CV (verbatim text): ${body.cvText ?? "N/A"}
 - Past Interview Notes: ${body.pastNotes ?? "N/A"}
-- Additional info: ${body.context}
+- Additional info (if present): ${body.context}
 
 GOALS
 - Automate the initial HR screening to capture essential candidate insights.
