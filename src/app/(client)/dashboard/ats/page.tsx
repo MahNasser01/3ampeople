@@ -285,7 +285,7 @@ function ATSPage() {
                       Average Score
                     </p>
                     <p className="text-2xl font-bold">
-                      {stats.averageScore.toFixed(1)}
+                      {parseInt((stats.averageScore / 10).toString())}
                     </p>
                   </div>
                   <CheckCircle className="h-8 w-8 text-purple-600" />
@@ -374,7 +374,7 @@ function ATSPage() {
                     <span
                       className={`font-bold ${getScoreColor(applicant.score)}`}
                     >
-                      {applicant.score}/100
+                      {parseInt((applicant.score / 10).toString())}/100
                     </span>
                   </div>
 
