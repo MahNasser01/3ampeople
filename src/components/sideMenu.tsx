@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { PlayCircleIcon, SpeechIcon } from "lucide-react";
+import { PlayCircleIcon, SpeechIcon , ShieldCheckIcon} from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 
 function SideMenu() {
@@ -22,6 +22,13 @@ function SideMenu() {
       path: "/dashboard/interviewers",
       isActive: pathname.endsWith("/interviewers"),
       description: "Configure AI interviewers"
+    },
+    {
+      icon: ShieldCheckIcon,
+      label: "ATS", 
+      path: "/dashboard/ats",
+      isActive: pathname.endsWith("/ats"),
+      description: "ATS Integration"
     }
   ];
 
