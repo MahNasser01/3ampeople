@@ -36,6 +36,7 @@ import {
 } from "@/components/ui/select";
 import { CandidateStatus } from "@/lib/enum";
 import LoaderWithText from "@/components/loaders/loader-with-text/loaderWithText";
+import { APP_COLORS } from "@/lib/constants";
 
 interface Props {
   params: {
@@ -62,8 +63,8 @@ function InterviewHome({ params, searchParams }: Props) {
   const [isViewed, setIsViewed] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [showColorPicker, setShowColorPicker] = useState<boolean>(false);
-  const [themeColor, setThemeColor] = useState<string>("#4F46E5");
-  const [iconColor, seticonColor] = useState<string>("#4F46E5");
+  const [themeColor, setThemeColor] = useState<string>(APP_COLORS.PRIMARY);
+  const [iconColor, seticonColor] = useState<string>(APP_COLORS.PRIMARY);
   const { organization } = useOrganization();
   const [filterStatus, setFilterStatus] = useState<string>("ALL");
 
@@ -88,8 +89,8 @@ function InterviewHome({ params, searchParams }: Props) {
         setInterview(response);
         setIsActive(response.is_active);
         setIsViewed(response.is_viewed);
-        setThemeColor(response.theme_color ?? "#4F46E5");
-        seticonColor(response.theme_color ?? "#4F46E5");
+        setThemeColor(response.theme_color ?? APP_COLORS.PRIMARY);
+        seticonColor(response.theme_color ?? APP_COLORS.PRIMARY);
         setLoading(true);
       } catch (error) {
         console.error(error);
@@ -262,7 +263,7 @@ function InterviewHome({ params, searchParams }: Props) {
         </div>
       ) : (
         <>
-          <div className="flex flex-row p-3 pt-4 justify-center gap-6 items-center sticky top-2 bg-white">
+          <div className="flex flex-row p-3 pt-4 justify-center gap-6 items-center sticky top-0 z-50 bg-white">
             <div className="font-bold text-md">{interview?.name}</div>
 
             <div
@@ -280,7 +281,7 @@ function InterviewHome({ params, searchParams }: Props) {
                 <TooltipTrigger asChild>
                   <Button
                     className={
-                      "bg-transparent shadow-none relative text-xs text-indigo-600 px-1 h-7 hover:scale-110 hover:bg-transparent"
+                      "bg-transparent shadow-none relative text-xs text-primary-600 px-1 h-7 hover:scale-110 hover:bg-transparent"
                     }
                     variant={"secondary"}
                     onClick={(event) => {
@@ -304,7 +305,7 @@ function InterviewHome({ params, searchParams }: Props) {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
-                    className="bg-transparent shadow-none text-xs text-indigo-600 px-0 h-7 hover:scale-110 relative"
+                    className="bg-transparent shadow-none text-xs text-primary-600 px-0 h-7 hover:scale-110 relative"
                     onClick={(event) => {
                       event.stopPropagation();
                       seeInterviewPreviewPage();
@@ -328,7 +329,7 @@ function InterviewHome({ params, searchParams }: Props) {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
-                    className="bg-transparent shadow-none text-xs text-indigo-600 px-0 h-7 hover:scale-110 relative"
+                    className="bg-transparent shadow-none text-xs text-primary-600 px-0 h-7 hover:scale-110 relative"
                     onClick={(event) => {
                       event.stopPropagation();
                       setShowColorPicker(!showColorPicker);
@@ -352,7 +353,7 @@ function InterviewHome({ params, searchParams }: Props) {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
-                    className="bg-transparent shadow-none text-xs text-indigo-600 px-0 h-7 hover:scale-110 relative"
+                    className="bg-transparent shadow-none text-xs text-primary-600 px-0 h-7 hover:scale-110 relative"
                     onClick={(event) => {
                       router.push(
                         `/interviews/${params.interviewId}?edit=true`,
@@ -394,7 +395,7 @@ function InterviewHome({ params, searchParams }: Props) {
                   <Switch
                     checked={isActive}
                     className={`ms-3 my-auto ${
-                      isActive ? "bg-indigo-600" : "bg-[#E6E7EB]"
+                      isActive ? "bg-primary-600" : "bg-[#E6E7EB]"
                     }`}
                     onCheckedChange={handleToggle}
                   />
@@ -453,10 +454,10 @@ function InterviewHome({ params, searchParams }: Props) {
                 {filterResponses().length > 0 ? (
                   filterResponses().map((response) => (
                     <div
-                      className={`p-2 rounded-md hover:bg-indigo-100 border-2 my-1 text-left text-xs ${
+                      className={`p-2 rounded-md hover:bg-primary-100 border-2 my-1 text-left text-xs ${
                         searchParams.call == response.call_id
-                          ? "bg-indigo-200"
-                          : "border-indigo-100"
+                          ? "bg-primary-200"
+                          : "border-primary-100"
                       } flex flex-row justify-between cursor-pointer w-full`}
                       key={response?.id}
                       onClick={() => {
@@ -492,7 +493,7 @@ function InterviewHome({ params, searchParams }: Props) {
                           <div className="flex flex-col items-center justify-center ml-auto flex-shrink-0">
                             {!response.is_viewed && (
                               <div className="w-4 h-4 flex items-center justify-center mb-1">
-                                <div className="text-indigo-500 text-xl leading-none">
+                                <div className="text-primary-500 text-xl leading-none">
                                   ●
                                 </div>
                               </div>
@@ -508,8 +509,8 @@ function InterviewHome({ params, searchParams }: Props) {
                                   <TooltipProvider>
                                     <Tooltip>
                                       <TooltipTrigger asChild>
-                                        <div className="w-6 h-6 rounded-full bg-white border-2 border-indigo-500 flex items-center justify-center">
-                                          <span className="text-indigo-500 text-xs font-semibold">
+                                        <div className="w-6 h-6 rounded-full bg-white border-2 border-primary-500 flex items-center justify-center">
+                                          <span className="text-primary-500 text-xs font-semibold">
                                             {response?.analytics?.overallScore}
                                           </span>
                                         </div>

@@ -36,6 +36,8 @@ import {
 } from "@/components/ui/select";
 import { CandidateStatus } from "@/lib/enum";
 import { ArrowLeft } from "lucide-react";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import CustomAudioPlayer from "./customAudio";
 
 type CallProps = {
   call_id: string;
@@ -59,6 +61,12 @@ function CallInfo({
   const [candidateStatus, setCandidateStatus] = useState<string>("");
   const [interviewId, setInterviewId] = useState<string>("");
   const [tabSwitchCount, setTabSwitchCount] = useState<number>();
+  const [videoUrl, setVideoUrl] = useState<string>("");
+  const [cheatResult, setCheatResult] = useState<{
+    gaze_direction: number;
+    head_direction: number;
+    mobile_detected: number;
+  }>({ gaze_direction: 0, head_direction: 0, mobile_detected: 0 });
 
   useEffect(() => {
     const fetchResponses = async () => {
@@ -79,6 +87,41 @@ function CallInfo({
     };
 
     fetchResponses();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [call_id]);
+
+  useEffect(() => {
+    console.log('load video')
+    // Load latest cheat_file video for this call
+    const loadVideo = async () => {
+      try {
+        const supabase = createClientComponentClient();
+        const { data, error } = await supabase
+          .from("cheat_file")
+          .select("file_path, result")
+          .eq("call_id", call_id)
+          .order("created_at", { ascending: false })
+          .limit(1);
+        if (!error && data && data.length > 0) {
+          setVideoUrl(data[0].file_path as string);
+          const r = (data[0] as any).result;
+          if (r) {
+            const parsed = typeof r === "string" ? (() => { try { return JSON.parse(r); } catch { return null; } })() : r;
+            if (
+              parsed &&
+              typeof parsed.gaze_direction === "number" &&
+              typeof parsed.head_direction === "number" &&
+              typeof parsed.mobile_detected === "number"
+            ) {
+              setCheatResult(parsed);
+            }
+          }
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    loadVideo();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [call_id]);
 
@@ -277,21 +320,53 @@ function CallInfo({
                   </div>
                 </div>
                 <div className="flex flex-col mt-3">
-                  <p className="font-semibold">Interview Recording</p>
-                  <div className="flex flex-row gap-3 mt-2">
-                    {call?.recording_url && (
-                      <ReactAudioPlayer src={call?.recording_url} controls />
-                    )}
-                    <a
-                      className="my-auto"
-                      href={call?.recording_url}
-                      download=""
-                      aria-label="Download"
-                    >
-                      <DownloadIcon size={20} />
-                    </a>
-                  </div>
-                </div>
+  <p className="font-semibold text-lg text-gray-800 mb-3">
+    Interview Recording
+  </p>
+
+  <div className="flex flex-col md:flex-row gap-6">
+    {/* 🎙️ Audio Recording */}
+    {call?.recording_url && (
+      <div className="flex flex-col items-center bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 rounded-2xl shadow-md p-4 w-full md:w-1/2">
+        <p className="font-medium text-sm mb-3 text-orange-700">Audio</p>
+        <CustomAudioPlayer
+          src={call?.recording_url}
+        />
+      </div>
+    )}
+
+    {/* 🎥 Video Recording */}
+    {videoUrl && (
+      <div className="flex flex-col items-center bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 rounded-2xl shadow-md p-4 w-full md:w-1/2">
+        <p className="font-medium text-sm mb-3 text-orange-700">Video</p>
+        <video
+          src={videoUrl}
+          controls
+          className="w-full max-h-72 rounded-xl border border-orange-300 shadow-lg accent-orange-500"
+        />
+      </div>
+    )}
+  </div>
+
+  {/* 📥 Download */}
+  {(videoUrl || call?.recording_url) && (
+    <div className="flex justify-end mt-5">
+      <a
+        href={videoUrl || call?.recording_url}
+        download
+        aria-label="Download"
+      >
+        <Button
+          variant="outline"
+          className="flex items-center gap-2 rounded-full border-orange-400 text-orange-600 hover:bg-orange-50 shadow-sm"
+        >
+          <DownloadIcon size={18} />
+          <span>Download Recording</span>
+        </Button>
+      </a>
+    </div>
+  )}
+</div>
               </div>
             </div>
             {/* <div>{call.}</div> */}
@@ -371,6 +446,30 @@ function CallInfo({
                   </div>
                 </div>
               )}
+            {cheatResult && (
+              <div className="flex flex-col gap-4 text-sm p-6 rounded-3xl bg-white/80 backdrop-blur-sm border border-orange-100 shadow-lg">
+                <div className="flex flex-row gap-2 align-middle">
+                  <p className="font-medium my-auto text-xl">Proctoring</p>
+                </div>
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium">Mobile Detected:</span>
+                    <span className={`${cheatResult.mobile_detected === 1 ? "text-red-500" : "text-green-500"} text-xl`}>
+                      ●
+                    </span>
+                    <span className="text-sm">{cheatResult.mobile_detected > 5 ? "Yes" : "No"}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium">Gaze Direction:</span>
+                    <span className="text-sm">{cheatResult.gaze_direction}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium">Head Direction:</span>
+                    <span className="text-sm">{cheatResult.head_direction}</span>
+                  </div>
+                </div>
+              </div>
+            )}
               <div className="flex flex-col gap-4 text-sm p-6 rounded-3xl bg-white/80 backdrop-blur-sm border border-orange-100 shadow-lg">
                 <div className="flex flex-row gap-2  align-middle">
                   <p className="my-auto">User Sentiment: </p>
