@@ -397,7 +397,7 @@ function Call({ interview }: InterviewProps) {
           registerCallResponse?.data?.registerCallResponse?.call_id || "";
 
         // Begin local recording
-        await startRecording();
+        // await startRecording();
 
         const response = await createResponse({
           interview_id: interview.id,
