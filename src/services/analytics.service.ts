@@ -39,7 +39,7 @@ export const generateInterviewAnalytics = async (payload: {
 
     const prompt = getInterviewAnalyticsPrompt(
       interviewTranscript,
-      mainInterviewQuestions,
+      mainInterviewQuestions
     );
 
     const baseCompletion = await openai.chat.completions.create({
@@ -62,7 +62,7 @@ export const generateInterviewAnalytics = async (payload: {
     const analyticsResponse = JSON.parse(content);
 
     analyticsResponse.mainInterviewQuestions = questions.map(
-      (q: Question) => q.question,
+      (q: Question) => q.question
     );
 
     return { analytics: analyticsResponse, status: 200 };

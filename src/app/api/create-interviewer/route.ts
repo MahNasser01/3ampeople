@@ -56,14 +56,14 @@ export async function GET(res: NextRequest) {
         newInterviewer,
         newSecondInterviewer,
       },
-      { status: 200 },
+      { status: 200 }
     );
   } catch (error) {
     logger.error("Error creating interviewers:");
 
     return NextResponse.json(
       { error: "Failed to create interviewers" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

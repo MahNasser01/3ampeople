@@ -35,6 +35,8 @@ CREATE TABLE interviewer (
 CREATE TABLE interview (
     id TEXT PRIMARY KEY,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()),
+
+    -- Originals
     name TEXT,
     description TEXT,
     objective TEXT,
@@ -54,8 +56,55 @@ CREATE TABLE interview (
     respondents TEXT[],
     question_count INTEGER,
     response_count INTEGER,
-    time_duration TEXT
+    time_duration TEXT,
+    jd TEXT
 );
+
+-- Helpful indexes
+CREATE INDEX IF NOT EXISTS interview_org_arch_idx
+  ON interview (organization_id, is_archived);
+
+CREATE INDEX IF NOT EXISTS interview_slug_idx
+  ON interview (readable_slug);
+
+-- JSONB GIN indexes for fast filtering
+CREATE INDEX IF NOT EXISTS interview_questions_gin_idx
+  ON interview USING GIN (questions);
+
+CREATE INDEX IF NOT EXISTS interview_question_summaries_gin_idx
+  ON interview USING GIN (question_summaries);
+
+CREATE INDEX IF NOT EXISTS interview_insights_json_gin_idx
+  ON interview USING GIN (insights_json);
+
+CREATE INDEX IF NOT EXISTS interview_sparc_gin_idx
+  ON interview USING GIN (sparc_breakdown);
+
+-- New table: candidate-specific tailoring for interviews
+CREATE TABLE public.interview_candidate (
+  id TEXT PRIMARY KEY,                         -- uuid or cuid
+  interview_id TEXT NOT NULL REFERENCES public.interview(id) ON DELETE CASCADE,
+
+  -- Candidate identification (email is required here)
+  candidate_email TEXT NOT NULL,
+
+  -- Optional metadata
+  candidate_name TEXT,
+  cv_ref TEXT,                                 -- pointer to CV (file/url/id)
+
+  -- Tailored questions generated from JD + CV
+  tailored_questions JSONB,                    -- [{question:"..."}, ...]
+
+  created_at TIMESTAMPTZ DEFAULT TIMEZONE('utc', NOW())
+);
+
+-- Helpful indexes
+CREATE INDEX IF NOT EXISTS interview_candidate_interview_idx
+  ON public.interview_candidate (interview_id);
+
+CREATE INDEX IF NOT EXISTS interview_candidate_email_idx
+  ON public.interview_candidate (candidate_email);
+
 
 CREATE TABLE response (
     id SERIAL PRIMARY KEY,

@@ -37,25 +37,28 @@ function EditInterview({ interview }: EditInterviewProps) {
   const { fetchInterviews } = useInterviews();
 
   const [description, setDescription] = useState<string>(
-    interview?.description || "",
+    interview?.description || ""
   );
   const [objective, setObjective] = useState<string>(
-    interview?.objective || "",
+    interview?.objective || ""
+  );
+  const [jobDescription, setJobDescription] = useState<string>(
+    interview?.jd || ""
   );
   const [numQuestions, setNumQuestions] = useState<number>(
-    interview?.question_count || 1,
+    interview?.question_count || 1
   );
   const [duration, setDuration] = useState<Number>(
-    Number(interview?.time_duration),
+    Number(interview?.time_duration)
   );
   const [questions, setQuestions] = useState<Question[]>(
-    interview?.questions || [],
+    interview?.questions || []
   );
   const [selectedInterviewer, setSelectedInterviewer] = useState(
-    interview?.interviewer_id,
+    interview?.interviewer_id
   );
   const [isAnonymous, setIsAnonymous] = useState<boolean>(
-    interview?.is_anonymous || false,
+    interview?.is_anonymous || false
   );
 
   const [isClicked, setIsClicked] = useState(false);
@@ -64,11 +67,42 @@ function EditInterview({ interview }: EditInterviewProps) {
   const prevQuestionLengthRef = useRef(questions.length);
   const router = useRouter();
 
+  // Index is 1 for up or -1 for down
+  const onSwapQuestionPos = (questionId: string, index: 1 | -1) => {
+    const qIndex = questions.findIndex((q) => q.id === questionId);
+
+    if (qIndex === -1) {
+      return;
+    }
+
+    const targetIndex = qIndex + index;
+
+    if (targetIndex < 0 || targetIndex >= questions.length) {
+      return;
+    }
+
+    if (index === 1) {
+      setQuestions([
+        ...questions.slice(0, qIndex),
+        questions[targetIndex],
+        questions[qIndex],
+        ...questions.slice(targetIndex + 1),
+      ]);
+    } else {
+      setQuestions([
+        ...questions.slice(0, targetIndex),
+        questions[qIndex],
+        questions[targetIndex],
+        ...questions.slice(qIndex + 1),
+      ]);
+    }
+  };
+
   const handleInputChange = (id: string, newQuestion: Question) => {
     setQuestions(
       questions.map((question) =>
-        question.id === id ? { ...question, ...newQuestion } : question,
-      ),
+        question.id === id ? { ...question, ...newQuestion } : question
+      )
     );
   };
 
@@ -79,13 +113,12 @@ function EditInterview({ interview }: EditInterviewProps) {
           ...question,
           question: "",
           follow_up_count: 1,
-        })),
+        }))
       );
 
       return;
     }
     setQuestions(questions.filter((question) => question.id !== id));
-    setNumQuestions(numQuestions - 1);
   };
 
   const handleAddQuestion = () => {
@@ -109,6 +142,7 @@ function EditInterview({ interview }: EditInterviewProps) {
       time_duration: Number(duration),
       description: description,
       is_anonymous: isAnonymous,
+      jd: jobDescription,
     };
 
     try {
@@ -117,7 +151,7 @@ function EditInterview({ interview }: EditInterviewProps) {
       }
       const response = await InterviewService.updateInterview(
         interviewData,
-        interview?.id,
+        interview?.id
       );
       setIsClicked(false);
       fetchInterviews();
@@ -154,6 +188,7 @@ function EditInterview({ interview }: EditInterviewProps) {
     }
     prevQuestionLengthRef.current = questions.length;
   }, [questions.length]);
+  console.log(questions.length, numQuestions);
 
   return (
     <div className="h-screen z-[10] mx-4">
@@ -171,7 +206,9 @@ function EditInterview({ interview }: EditInterviewProps) {
         </div>
         <div className="flex flex-row justify-between items-start mb-6">
           <div className="flex flex-col gap-1">
-            <h2 className="text-xl font-bold text-gray-800">Interview Description</h2>
+            <h2 className="text-xl font-bold text-gray-800">
+              Interview Description
+            </h2>
             <p className="text-sm text-gray-600">
               Your respondents will see this description
             </p>
@@ -233,9 +270,26 @@ function EditInterview({ interview }: EditInterviewProps) {
             }}
           />
         </div>
-        
+
         <div className="mb-6">
-          <h3 className="text-lg font-semibold text-gray-800 mb-3">Objective</h3>
+          <h3 className="text-lg font-semibold text-gray-800 mb-3">
+            Job Description
+          </h3>
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-orange-100">
+            <textarea
+              value={jobDescription}
+              className="w-full py-3 px-4 border-2 rounded-xl border-gray-300 focus:border-orange-500 focus:outline-none transition-colors duration-200 bg-white/50"
+              placeholder="Describe the daily duties and key objectives for this role"
+              rows={3}
+              onChange={(e) => setJobDescription(e.target.value)}
+              onBlur={(e) => setJobDescription(e.target.value.trim())}
+            />
+          </div>
+        </div>
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold text-gray-800 mb-3">
+            Objective
+          </h3>
           <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-orange-100">
             <textarea
               value={objective}
@@ -248,7 +302,9 @@ function EditInterview({ interview }: EditInterviewProps) {
           </div>
         </div>
         <div className="mb-6">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">Select Interviewer</h3>
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">
+            Select Interviewer
+          </h3>
           <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-orange-100">
             <div className="flex items-center">
               <div
@@ -295,14 +351,13 @@ function EditInterview({ interview }: EditInterviewProps) {
                   Anonymous Responses
                 </span>
                 <span className="text-xs text-gray-600">
-                  If not anonymous, the interviewee's email and name will be collected
+                  If not anonymous, the interviewee&lsquo;s email and name will
+                  be collected
                 </span>
               </div>
               <Switch
                 checked={isAnonymous}
-                className={`${
-                  isAnonymous ? "bg-orange-500" : "bg-gray-300"
-                }`}
+                className={`${isAnonymous ? "bg-orange-500" : "bg-gray-300"}`}
                 onCheckedChange={(checked) => setIsAnonymous(checked)}
               />
             </div>
@@ -310,11 +365,13 @@ function EditInterview({ interview }: EditInterviewProps) {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-orange-100">
-            <h3 className="text-sm font-semibold text-gray-800 mb-3">Number of Questions</h3>
+            <h3 className="text-sm font-semibold text-gray-800 mb-3">
+              Number of Questions
+            </h3>
             <input
               type="number"
               step="1"
-              max="5"
+              max="15"
               min={questions.length.toString()}
               className="w-full text-center focus:outline-none bg-orange-50/50 rounded-xl border-2 border-gray-300 focus:border-orange-500 px-4 py-3 transition-colors duration-200"
               value={numQuestions}
@@ -324,8 +381,8 @@ function EditInterview({ interview }: EditInterviewProps) {
                   value === "" ||
                   (Number.isInteger(Number(value)) && Number(value) > 0)
                 ) {
-                  if (Number(value) > 5) {
-                    value = "5";
+                  if (Number(value) > 15) {
+                    value = "15";
                   }
                   setNumQuestions(Number(value));
                 }
@@ -333,11 +390,13 @@ function EditInterview({ interview }: EditInterviewProps) {
             />
           </div>
           <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-orange-100">
-            <h3 className="text-sm font-semibold text-gray-800 mb-3">Duration (minutes)</h3>
+            <h3 className="text-sm font-semibold text-gray-800 mb-3">
+              Duration (minutes)
+            </h3>
             <input
               type="number"
               step="1"
-              max="10"
+              max="60"
               min="1"
               className="w-full text-center focus:outline-none bg-orange-50/50 rounded-xl border-2 border-gray-300 focus:border-orange-500 px-4 py-3 transition-colors duration-200"
               value={Number(duration)}
@@ -347,8 +406,8 @@ function EditInterview({ interview }: EditInterviewProps) {
                   value === "" ||
                   (Number.isInteger(Number(value)) && Number(value) > 0)
                 ) {
-                  if (Number(value) > 10) {
-                    value = "10";
+                  if (Number(value) > 60) {
+                    value = "60";
                   }
                   setDuration(Number(value));
                 }
@@ -357,9 +416,11 @@ function EditInterview({ interview }: EditInterviewProps) {
           </div>
         </div>
         <div className="mb-6">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">Questions</h3>
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">
+            Questions
+          </h3>
           <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-orange-100">
-            <ScrollArea className="max-h-[500px]">
+            <ScrollArea className="max-h-[500px] overflow-auto">
               <div className="space-y-4">
                 {questions.map((question, index) => (
                   <QuestionCard
@@ -368,6 +429,8 @@ function EditInterview({ interview }: EditInterviewProps) {
                     questionData={question}
                     onDelete={handleDeleteQuestion}
                     onQuestionChange={handleInputChange}
+                    onSwapUp={() => onSwapQuestionPos(question.id, -1)}
+                    onSwapDown={() => onSwapQuestionPos(question.id, 1)}
                   />
                 ))}
                 <div ref={endOfListRef} />
@@ -384,7 +447,9 @@ function EditInterview({ interview }: EditInterviewProps) {
                           className="text-orange-600"
                         />
                       </div>
-                      <span className="text-sm font-medium text-orange-600">Add Question</span>
+                      <span className="text-sm font-medium text-orange-600">
+                        Add Question
+                      </span>
                     </div>
                   </div>
                 ) : (

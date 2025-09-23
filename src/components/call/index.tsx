@@ -92,7 +92,7 @@ function Call({ interview }: InterviewProps) {
   const lastUserResponseRef = useRef<HTMLDivElement | null>(null);
 
   const handleFeedbackSubmit = async (
-    formData: Omit<FeedbackData, "interview_id">,
+    formData: Omit<FeedbackData, "interview_id">
   ) => {
     try {
       const result = await FeedbackService.submitFeedback({
@@ -241,7 +241,9 @@ function Call({ interview }: InterviewProps) {
       }
 
       recorder.ondataavailable = async (event: BlobEvent) => {
-        if (!event.data || event.data.size === 0) {return;}
+        if (!event.data || event.data.size === 0) {
+          return;
+        }
         recordedChunksRef.current.push(event.data);
 
         // Stream chunk if socket is open
@@ -266,10 +268,14 @@ function Call({ interview }: InterviewProps) {
         }
 
         // Save full recording locally
-        const blob = new Blob(recordedChunksRef.current, { type: recorder.mimeType });
+        const blob = new Blob(recordedChunksRef.current, {
+          type: recorder.mimeType,
+        });
         const call = callIdRef.current || "no-call-id";
         const ts = new Date().toISOString().replace(/[:.]/g, "-");
-        const filename = `interview-${interview?.id || "unknown"}-${call}-${ts}.webm`;
+        const filename = `interview-${
+          interview?.id || "unknown"
+        }-${call}-${ts}.webm`;
 
         const uploadUrl = process.env.NEXT_PUBLIC_CHEAT_UPLOAD_URL;
         if (uploadUrl) {
@@ -286,7 +292,9 @@ function Call({ interview }: InterviewProps) {
               method: "POST",
               body: form,
             });
-            if (!res.ok) {throw new Error(`Upload failed: ${res.status}`);}
+            if (!res.ok) {
+              throw new Error(`Upload failed: ${res.status}`);
+            }
             toast.success("Interview recording uploaded for analysis.");
           } catch (e) {
             console.error("Upload failed, falling back to download.", e);
@@ -321,7 +329,10 @@ function Call({ interview }: InterviewProps) {
 
   const stopRecording = () => {
     try {
-      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+      if (
+        mediaRecorderRef.current &&
+        mediaRecorderRef.current.state !== "inactive"
+      ) {
         mediaRecorderRef.current.stop();
       }
     } catch {}
@@ -335,7 +346,10 @@ function Call({ interview }: InterviewProps) {
       mediaStreamRef.current = null;
     }
 
-    if (cheatSocketRef.current && cheatSocketRef.current.readyState === WebSocket.OPEN) {
+    if (
+      cheatSocketRef.current &&
+      cheatSocketRef.current.readyState === WebSocket.OPEN
+    ) {
       try {
         cheatSocketRef.current.close();
       } catch {}
@@ -347,8 +361,10 @@ function Call({ interview }: InterviewProps) {
     const data = {
       mins: interview?.time_duration,
       objective: interview?.objective,
-      questions: interview?.questions.map((q) => q.question).join(", "),
+      questions: interview?.questions.map((q) => q.question),
       name: name || "not provided",
+      email,
+      interview_id: interview?.id,
     };
     setLoading(true);
 
@@ -364,7 +380,7 @@ function Call({ interview }: InterviewProps) {
     } else {
       const registerCallResponse: registerCallResponseType = await axios.post(
         "/api/register-call",
-        { dynamic_data: data, interviewer_id: interview?.interviewer_id },
+        { dynamic_data: data, interviewer_id: interview?.interviewer_id }
       );
       if (registerCallResponse.data.registerCallResponse.access_token) {
         await webClient
@@ -375,13 +391,13 @@ function Call({ interview }: InterviewProps) {
           .catch(console.error);
         setIsCalling(true);
         setIsStarted(true);
-        
+
         setCallId(registerCallResponse?.data?.registerCallResponse?.call_id);
-        callIdRef.current = registerCallResponse?.data?.registerCallResponse?.call_id || "";
+        callIdRef.current =
+          registerCallResponse?.data?.registerCallResponse?.call_id || "";
 
         // Begin local recording
         await startRecording();
-
 
         const response = await createResponse({
           interview_id: interview.id,
@@ -406,7 +422,7 @@ function Call({ interview }: InterviewProps) {
   useEffect(() => {
     const fetchInterviewer = async () => {
       const interviewer = await InterviewerService.getInterviewer(
-        interview.interviewer_id,
+        interview.interviewer_id
       );
       setInterviewerImg(interviewer.image);
     };
@@ -419,7 +435,7 @@ function Call({ interview }: InterviewProps) {
       const updateInterview = async () => {
         await ResponseService.saveResponse(
           { is_ended: true, tab_switch_count: tabSwitchCount },
-          callId,
+          callId
         );
       };
 
@@ -522,8 +538,11 @@ function Call({ interview }: InterviewProps) {
                   <Button
                     className="min-w-20 h-10 rounded-lg flex flex-row justify-center mb-8"
                     style={{
-                      backgroundColor: interview.theme_color ?? APP_COLORS.PRIMARY,
-                      color: isLightColor(interview.theme_color ?? APP_COLORS.PRIMARY)
+                      backgroundColor:
+                        interview.theme_color ?? APP_COLORS.PRIMARY,
+                      color: isLightColor(
+                        interview.theme_color ?? APP_COLORS.PRIMARY
+                      )
                         ? "black"
                         : "white",
                     }}

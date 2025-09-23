@@ -22,21 +22,52 @@ function QuestionsPopup({ interviewData, setProceed, setOpen }: Props) {
   const [isClicked, setIsClicked] = useState(false);
 
   const [questions, setQuestions] = useState<Question[]>(
-    interviewData.questions,
+    interviewData.questions
   );
   const [description, setDescription] = useState<string>(
-    interviewData.description.trim(),
+    interviewData.description.trim()
   );
   const { fetchInterviews } = useInterviews();
 
   const endOfListRef = useRef<HTMLDivElement>(null);
   const prevQuestionLengthRef = useRef(questions.length);
 
+  // Index is 1 for up or -1 for down
+  const onSwapQuestionPos = (questionId: string, index: 1 | -1) => {
+    const qIndex = questions.findIndex((q) => q.id === questionId);
+
+    if (qIndex === -1) {
+      return;
+    }
+
+    const targetIndex = qIndex + index;
+
+    if (targetIndex < 0 || targetIndex >= questions.length) {
+      return;
+    }
+
+    if (index === 1) {
+      setQuestions([
+        ...questions.slice(0, qIndex),
+        questions[targetIndex],
+        questions[qIndex],
+        ...questions.slice(targetIndex + 1),
+      ]);
+    } else {
+      setQuestions([
+        ...questions.slice(0, targetIndex),
+        questions[qIndex],
+        questions[targetIndex],
+        ...questions.slice(qIndex + 1),
+      ]);
+    }
+  };
+
   const handleInputChange = (id: string, newQuestion: Question) => {
     setQuestions(
       questions.map((question) =>
-        question.id === id ? { ...question, ...newQuestion } : question,
-      ),
+        question.id === id ? { ...question, ...newQuestion } : question
+      )
     );
   };
 
@@ -47,7 +78,7 @@ function QuestionsPopup({ interviewData, setProceed, setOpen }: Props) {
           ...question,
           question: "",
           follow_up_count: 1,
-        })),
+        }))
       );
 
       return;
@@ -128,6 +159,8 @@ function QuestionsPopup({ interviewData, setProceed, setOpen }: Props) {
               questionData={question}
               onDelete={handleDeleteQuestion}
               onQuestionChange={handleInputChange}
+              onSwapUp={() => onSwapQuestionPos(question.id, -1)}
+              onSwapDown={() => onSwapQuestionPos(question.id, 1)}
             />
           ))}
           <div ref={endOfListRef} />

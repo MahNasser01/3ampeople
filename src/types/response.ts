@@ -1,3 +1,5 @@
+import { SparcItem } from "@/components/call/sparcScoreCard";
+
 export interface Response {
   id: bigint;
   created_at: Date;
@@ -19,6 +21,7 @@ export interface Analytics {
   overallScore: number;
   overallFeedback: string;
   communication: { score: number; feedback: string };
+  sparc_breakdown: Array<SparcItem>;
   generalIntelligence: string;
   softSkillSummary: string;
   questionSummaries: Array<{
