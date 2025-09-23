@@ -241,7 +241,7 @@ function Call({ interview }: InterviewProps) {
       }
 
       recorder.ondataavailable = async (event: BlobEvent) => {
-        if (!event.data || event.data.size === 0) return;
+        if (!event.data || event.data.size === 0) {return;}
         recordedChunksRef.current.push(event.data);
 
         // Stream chunk if socket is open
@@ -286,7 +286,7 @@ function Call({ interview }: InterviewProps) {
               method: "POST",
               body: form,
             });
-            if (!res.ok) throw new Error(`Upload failed: ${res.status}`);
+            if (!res.ok) {throw new Error(`Upload failed: ${res.status}`);}
             toast.success("Interview recording uploaded for analysis.");
           } catch (e) {
             console.error("Upload failed, falling back to download.", e);

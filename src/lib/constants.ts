@@ -120,6 +120,8 @@ export const BUSINESS_INFO = {
   address: '123 Main St, Cairo, Egypt',
   website: `https://${process.env.NEXT_PUBLIC_LIVE_URL}`,
   interviewUrl: `${process.env.NEXT_PUBLIC_LIVE_URL}/call/gradion-backend`
+}
+
 export const APP_COLORS = {
   PRIMARY: "#FF5E1F",
   PRIMARY_LIGHT: "#FF7A47",

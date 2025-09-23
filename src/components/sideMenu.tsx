@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { PlayCircleIcon, SpeechIcon } from "lucide-react";
+import { PlayCircleIcon, SpeechIcon , ShieldCheckIcon} from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 
 function SideMenu() {
@@ -22,6 +22,13 @@ function SideMenu() {
       path: "/dashboard/interviewers",
       isActive: pathname.endsWith("/interviewers"),
       description: "Configure AI interviewers"
+    },
+    {
+      icon: ShieldCheckIcon,
+      label: "ATS", 
+      path: "/dashboard/ats",
+      isActive: pathname.endsWith("/ats"),
+      description: "ATS Integration"
     }
   ];
 
@@ -90,17 +97,6 @@ function SideMenu() {
           <div className="flex items-center gap-3 text-xs text-gray-500">
             <div className="w-1.5 h-1.5 bg-primary-400 rounded-full" />
             <span>3AM v1.0</span>
-          </div>
-          <div
-            className={`flex flex-row p-3 rounded-md hover:bg-slate-200 cursor-pointer ${
-              pathname.endsWith("/ats")
-                ? "bg-indigo-200"
-                : "bg-orange-50"
-            }`}
-            onClick={() => router.push("/dashboard/ats")}
-          >
-            <SpeechIcon className="font-thin mr-2" />
-            <p className="font-medium ">ATS</p>
           </div>
         </div>
       </div>
