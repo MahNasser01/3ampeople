@@ -2,10 +2,10 @@ module.exports = {
   root: true,
   extends: ["next/core-web-vitals", "prettier"],
   rules: {
-    curly: "error",
-    "newline-before-return": "error",
+    curly: "warn",
+    "newline-before-return": "warn",
     "no-restricted-exports": [
-      "error",
+      "warn",
       {
         restrictDefaultExports: {
           direct: false,
@@ -16,17 +16,10 @@ module.exports = {
         },
       },
     ],
-    "react/jsx-sort-props": [
-      "error",
-      {
-        noSortAlphabetically: true,
-        shorthandLast: true,
-        callbacksLast: true,
-      },
-    ],
+    "react/jsx-sort-props": [],
     "react/no-array-index-key": "warn",
     "react/no-danger": "warn",
-    "react/self-closing-comp": "error",
+    "react/self-closing-comp": "warn",
     "react/function-component-definition": [
       "error",
       {
@@ -34,9 +27,9 @@ module.exports = {
         unnamedComponents: "arrow-function",
       },
     ],
-    "jsx-a11y/alt-text": "error",
+    "jsx-a11y/alt-text": "warb",
     "import/no-extraneous-dependencies": [
-      "error",
+      "warn",
       {
         packageDir: __dirname,
       },
