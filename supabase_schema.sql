@@ -147,6 +147,9 @@ CREATE TABLE IF NOT EXISTS applications (
     analyzed_resume JSONB,
     resume_score NUMERIC,
     interview_id TEXT REFERENCES interview(id)
+);
+
+ALTER TABLE applications ADD COLUMN status TEXT NOT NULL DEFAULT 'new';
 
 -- Stores uploaded candidate recording metadata for cheat detection
 CREATE TABLE cheat_file (

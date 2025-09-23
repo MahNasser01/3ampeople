@@ -8,7 +8,7 @@ export async function GET(req: Request, res: Response) {
   try {
     const supabase = createClientComponentClient();
     const { data, error } = await supabase
-      .from("interview")
+      .from("applications")
       .select("*")
       .order("created_at", { ascending: false });
     if (!error && data) {
