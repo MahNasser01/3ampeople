@@ -41,3 +41,8 @@ export const INTERVIEWERS = {
     audio: "Bob.wav",
   },
 };
+
+export const APP_COLORS = {
+  PRIMARY: "#FF5E1F",
+  PRIMARY_LIGHT: "#FF7A47",
+}

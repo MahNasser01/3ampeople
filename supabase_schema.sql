@@ -83,6 +83,7 @@ CREATE TABLE feedback (
     satisfaction INTEGER
 );
 
+
 -- Applications table for candidate submissions
 CREATE TABLE IF NOT EXISTS applications (
     id BIGSERIAL PRIMARY KEY,
@@ -97,4 +98,19 @@ CREATE TABLE IF NOT EXISTS applications (
     analyzed_resume JSONB,
     resume_score NUMERIC,
     interview_id TEXT REFERENCES interview(id)
+
+-- Stores uploaded candidate recording metadata for cheat detection
+CREATE TABLE cheat_file (
+    id SERIAL PRIMARY KEY,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()),
+    interview_id TEXT REFERENCES interview(id),
+    call_id TEXT,
+    email TEXT,
+    name TEXT,
+    file_path TEXT,
+    mime_type TEXT,
+    status TEXT DEFAULT 'uploaded',
+    processed_at TIMESTAMP WITH TIME ZONE,
+    result JSONB
+
 );
