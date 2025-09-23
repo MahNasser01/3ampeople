@@ -8,12 +8,12 @@ import { Toaster } from "sonner";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "FoloUp",
+  title: "3AM",
   description: "AI powered Interviews",
   openGraph: {
-    title: "FoloUp",
+    title: "3AM",
     description: "AI-powered Interviews",
-    siteName: "FoloUp",
+    siteName: "3AM",
     images: [
       {
         url: "/foloup.png",
@@ -43,10 +43,10 @@ export default function RootLayout({
             <Toaster
               toastOptions={{
                 classNames: {
-                  toast: "bg-white border-2 border-indigo-400",
+                  toast: "bg-white border-2 border-primary-400",
                   title: "text-black",
                   description: "text-red-400",
-                  actionButton: "bg-indigo-400",
+                  actionButton: "bg-primary-400",
                   cancelButton: "bg-orange-400",
                   closeButton: "bg-lime-400",
                 },

@@ -37,6 +37,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { InterviewerService } from "@/services/interviewers.service";
+import { APP_COLORS } from "@/lib/constants";
 
 const webClient = new RetellWebClient();
 
@@ -368,8 +369,8 @@ function Call({ interview }: InterviewProps) {
                   <Button
                     className="min-w-20 h-10 rounded-lg flex flex-row justify-center mb-8"
                     style={{
-                      backgroundColor: interview.theme_color ?? "#4F46E5",
-                      color: isLightColor(interview.theme_color ?? "#4F46E5")
+                      backgroundColor: interview.theme_color ?? APP_COLORS.PRIMARY,
+                      color: isLightColor(interview.theme_color ?? APP_COLORS.PRIMARY)
                         ? "black"
                         : "white",
                     }}
