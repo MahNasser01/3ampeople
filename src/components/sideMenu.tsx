@@ -35,6 +35,17 @@ function SideMenu() {
             <SpeechIcon className="font-thin mr-2" />
             <p className="font-medium ">Interviewers</p>
           </div>
+          <div
+            className={`flex flex-row p-3 rounded-md hover:bg-slate-200 cursor-pointer ${
+              pathname.endsWith("/ats")
+                ? "bg-indigo-200"
+                : "bg-orange-50"
+            }`}
+            onClick={() => router.push("/dashboard/ats")}
+          >
+            <SpeechIcon className="font-thin mr-2" />
+            <p className="font-medium ">ATS</p>
+          </div>
         </div>
       </div>
     </div>

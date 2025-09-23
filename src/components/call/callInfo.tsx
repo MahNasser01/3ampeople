@@ -298,7 +298,7 @@ function CallInfo({
           </div>
           <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-3xl min-h-[120px] p-6 my-6 border border-orange-200 shadow-xl">
             <div className="flex items-center gap-2 mb-6">
-              <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
+              <div className="w-2 h-2 bg-orange-400 rounded-full" />
               <h2 className="text-xl font-bold text-gray-800">General Summary</h2>
             </div>
 
@@ -417,7 +417,7 @@ function CallInfo({
             analytics.questionSummaries.length > 0 && (
               <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-3xl min-h-[120px] p-6 my-6 border border-orange-200 shadow-xl">
                 <div className="flex items-center gap-2 mb-6">
-                  <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
+                  <div className="w-2 h-2 bg-orange-400 rounded-full" />
                   <h2 className="text-xl font-bold text-gray-800">Question Summary</h2>
                 </div>
                 <ScrollArea className="rounded-2xl h-72 text-sm py-3 leading-6 overflow-y-scroll whitespace-pre-line px-2 bg-white/60 backdrop-blur-sm border border-orange-100">
@@ -434,7 +434,7 @@ function CallInfo({
             )}
           <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-3xl min-h-[150px] max-h-[500px] p-6 mb-[150px] border border-orange-200 shadow-xl">
             <div className="flex items-center gap-2 mb-6">
-              <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
+              <div className="w-2 h-2 bg-orange-400 rounded-full" />
               <h2 className="text-xl font-bold text-gray-800">Transcript</h2>
             </div>
             <ScrollArea className="rounded-2xl text-sm h-96 overflow-y-auto whitespace-pre-line px-2 bg-white/60 backdrop-blur-sm border border-orange-100">
