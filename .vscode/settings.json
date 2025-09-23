@@ -3,7 +3,6 @@
     "editor.defaultFormatter": "vscode.json-language-features"
   },
   "editor.formatOnSave": true,
-  "editor.rulers": [100],
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit"
   },
