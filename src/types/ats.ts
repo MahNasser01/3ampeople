@@ -11,14 +11,15 @@ export interface ATSApplicant {
   experience: string;
   education: string;
   notes?: string;
+  interviewId?: string;
 }
 
 export enum ATSStatus {
-  NEW = 'new',
-  SCREENING = 'screening',
-  INTERVIEW = 'interview',
-  HIRED = 'hired',
-  REJECTED = 'rejected'
+  NEW = "new",
+  SCREENING = "screening",
+  INTERVIEW = "interview",
+  HIRED = "hired",
+  REJECTED = "rejected",
 }
 
 export interface ATSScore {

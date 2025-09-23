@@ -5,15 +5,31 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { ATSApplicant, ATSStatus, ATSStats } from "@/types/ats";
 import { getATSService } from "@/services/ats.service";
-import { Mail, Search, Users, TrendingUp, Clock, CheckCircle, XCircle } from "lucide-react";
+import {
+  Mail,
+  Search,
+  Users,
+  TrendingUp,
+  Clock,
+  CheckCircle,
+  XCircle,
+} from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 
 function ATSPage() {
   const [applicants, setApplicants] = useState<ATSApplicant[]>([]);
-  const [filteredApplicants, setFilteredApplicants] = useState<ATSApplicant[]>([]);
+  const [filteredApplicants, setFilteredApplicants] = useState<ATSApplicant[]>(
+    [],
+  );
   const [stats, setStats] = useState<ATSStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -27,9 +43,9 @@ function ATSPage() {
         const atsService = getATSService();
         const [applicantsData, statsData] = await Promise.all([
           atsService.getApplicants(),
-          atsService.getStats()
+          atsService.getStats(),
         ]);
-        
+
         setApplicants(applicantsData);
         setFilteredApplicants(applicantsData);
         setStats(statsData);
@@ -53,26 +69,35 @@ function ATSPage() {
 
     // Apply search filter
     if (searchQuery) {
-      filtered = filtered.filter(applicant =>
-        applicant.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        applicant.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        applicant.position.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        applicant.skills.some(skill => skill.toLowerCase().includes(searchQuery.toLowerCase()))
+      filtered = filtered.filter(
+        (applicant) =>
+          applicant.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          applicant.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          applicant.position
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          applicant.skills.some((skill) =>
+            skill.toLowerCase().includes(searchQuery.toLowerCase()),
+          ),
       );
     }
 
     // Apply status filter
     if (statusFilter !== "all") {
-      filtered = filtered.filter(applicant => applicant.status === statusFilter);
+      filtered = filtered.filter(
+        (applicant) => applicant.status === statusFilter,
+      );
     }
 
     // Apply score filter
     if (scoreFilter !== "all") {
       const [min, max] = scoreFilter.split("-").map(Number);
       if (max) {
-        filtered = filtered.filter(applicant => applicant.score >= min && applicant.score <= max);
+        filtered = filtered.filter(
+          (applicant) => applicant.score >= min && applicant.score <= max,
+        );
       } else {
-        filtered = filtered.filter(applicant => applicant.score >= min);
+        filtered = filtered.filter((applicant) => applicant.score >= min);
       }
     }
 
@@ -85,17 +110,29 @@ function ATSPage() {
       const atsService = getATSService();
       const success = await atsService.sendScreeningInvite(applicantId);
 
-      console.log("success", success);
-      
       if (success) {
+        // Update local state immediately to reflect status change
+        setApplicants((prevApplicants) =>
+          prevApplicants.map((applicant) =>
+            applicant.id === applicantId
+              ? { ...applicant, status: ATSStatus.SCREENING }
+              : applicant,
+          ),
+        );
+
+        // Also update filtered applicants if they exist
+        setFilteredApplicants((prevFiltered) =>
+          prevFiltered.map((applicant) =>
+            applicant.id === applicantId
+              ? { ...applicant, status: ATSStatus.SCREENING }
+              : applicant,
+          ),
+        );
+
         toast({
           title: "Success",
           description: "Screening invitation sent successfully!",
         });
-        
-        // Refresh data to show updated status
-        const updatedApplicants = await atsService.getApplicants();
-        setApplicants(updatedApplicants);
       } else {
         toast({
           title: "Error",
@@ -150,11 +187,17 @@ function ATSPage() {
   };
 
   const getScoreColor = (score: number) => {
-    if (score >= 90) {return "text-green-600";}
-    if (score >= 80) {return "text-blue-600";}
-    if (score >= 70) {return "text-yellow-600";}
-    
-return "text-red-600";
+    if (score >= 90) {
+      return "text-green-600";
+    }
+    if (score >= 80) {
+      return "text-blue-600";
+    }
+    if (score >= 70) {
+      return "text-yellow-600";
+    }
+
+    return "text-red-600";
   };
 
   if (loading) {
@@ -196,44 +239,54 @@ return "text-red-600";
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Total Applicants</p>
+                    <p className="text-sm font-medium text-gray-600">
+                      Total Applicants
+                    </p>
                     <p className="text-2xl font-bold">{stats.total}</p>
                   </div>
                   <Users className="h-8 w-8 text-blue-600" />
                 </div>
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">New Applications</p>
+                    <p className="text-sm font-medium text-gray-600">
+                      New Applications
+                    </p>
                     <p className="text-2xl font-bold">{stats.new}</p>
                   </div>
                   <Clock className="h-8 w-8 text-yellow-600" />
                 </div>
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">In Screening</p>
+                    <p className="text-sm font-medium text-gray-600">
+                      In Screening
+                    </p>
                     <p className="text-2xl font-bold">{stats.screening}</p>
                   </div>
                   <TrendingUp className="h-8 w-8 text-green-600" />
                 </div>
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Average Score</p>
-                    <p className="text-2xl font-bold">{stats.averageScore.toFixed(1)}</p>
+                    <p className="text-sm font-medium text-gray-600">
+                      Average Score
+                    </p>
+                    <p className="text-2xl font-bold">
+                      {stats.averageScore.toFixed(1)}
+                    </p>
                   </div>
                   <CheckCircle className="h-8 w-8 text-purple-600" />
                 </div>
@@ -253,8 +306,13 @@ return "text-red-600";
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          
-          <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as ATSStatus | "all")}>
+
+          <Select
+            value={statusFilter}
+            onValueChange={(value) =>
+              setStatusFilter(value as ATSStatus | "all")
+            }
+          >
             <SelectTrigger className="w-48">
               <SelectValue placeholder="Filter by status" />
             </SelectTrigger>
@@ -267,7 +325,7 @@ return "text-red-600";
               <SelectItem value={ATSStatus.REJECTED}>Rejected</SelectItem>
             </SelectContent>
           </Select>
-          
+
           <Select value={scoreFilter} onValueChange={setScoreFilter}>
             <SelectTrigger className="w-48">
               <SelectValue placeholder="Filter by score" />
@@ -286,35 +344,49 @@ return "text-red-600";
         {/* Applicants List */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredApplicants.map((applicant) => (
-            <Card key={applicant.id} className="hover:shadow-lg transition-shadow">
+            <Card
+              key={applicant.id}
+              className="hover:shadow-lg transition-shadow"
+            >
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div>
                     <CardTitle className="text-lg">{applicant.name}</CardTitle>
                     <p className="text-sm text-gray-600">{applicant.email}</p>
-                    <p className="text-sm font-medium text-blue-600">{applicant.position}</p>
+                    <p className="text-sm font-medium text-blue-600">
+                      {applicant.position}
+                    </p>
                   </div>
-                  <Badge variant={getStatusBadgeVariant(applicant.status)} className="flex items-center gap-1">
+                  <Badge
+                    variant={getStatusBadgeVariant(applicant.status)}
+                    className="flex items-center gap-1"
+                  >
                     {getStatusIcon(applicant.status)}
                     {applicant.status}
                   </Badge>
                 </div>
               </CardHeader>
-              
+
               <CardContent>
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-600">Score:</span>
-                    <span className={`font-bold ${getScoreColor(applicant.score)}`}>
+                    <span
+                      className={`font-bold ${getScoreColor(applicant.score)}`}
+                    >
                       {applicant.score}/100
                     </span>
                   </div>
-                  
+
                   <div>
                     <p className="text-sm text-gray-600 mb-1">Skills:</p>
                     <div className="flex flex-wrap gap-1">
                       {applicant.skills.slice(0, 3).map((skill, index) => (
-                        <Badge key={index} variant="outline" className="text-xs">
+                        <Badge
+                          key={index}
+                          variant="outline"
+                          className="text-xs"
+                        >
                           {skill}
                         </Badge>
                       ))}
@@ -325,13 +397,13 @@ return "text-red-600";
                       )}
                     </div>
                   </div>
-                  
+
                   <div className="text-sm text-gray-600">
                     <p>Experience: {applicant.experience}</p>
                     <p>Education: {applicant.education}</p>
                     <p>Applied: {applicant.appliedAt.toLocaleDateString()}</p>
                   </div>
-                  
+
                   {applicant.status === ATSStatus.NEW && (
                     <Button
                       disabled={sendingEmail === applicant.id}
@@ -348,7 +420,7 @@ return "text-red-600";
                       )}
                     </Button>
                   )}
-                  
+
                   {applicant.notes && (
                     <div className="mt-3 p-2 bg-gray-50 rounded text-sm">
                       <p className="font-medium text-gray-700">Notes:</p>
@@ -360,12 +432,16 @@ return "text-red-600";
             </Card>
           ))}
         </div>
-        
+
         {filteredApplicants.length === 0 && (
           <div className="text-center py-12">
             <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No applicants found</h3>
-            <p className="text-gray-600">Try adjusting your search or filter criteria.</p>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              No applicants found
+            </h3>
+            <p className="text-gray-600">
+              Try adjusting your search or filter criteria.
+            </p>
           </div>
         )}
       </div>
