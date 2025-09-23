@@ -74,6 +74,7 @@ function Call({ interview }: InterviewProps) {
   const [isValidEmail, setIsValidEmail] = useState<boolean>(false);
   const [isOldUser, setIsOldUser] = useState<boolean>(false);
   const [callId, setCallId] = useState<string>("");
+  const callIdRef = useRef<string>("");
   const { tabSwitchCount } = useTabSwitchPrevention();
   const [isFeedbackSubmitted, setIsFeedbackSubmitted] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -82,6 +83,11 @@ function Call({ interview }: InterviewProps) {
     useState<string>("1");
   const [time, setTime] = useState(0);
   const [currentTimeDuration, setCurrentTimeDuration] = useState<string>("0");
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const mediaStreamRef = useRef<MediaStream | null>(null);
+  const recordedChunksRef = useRef<Blob[]>([]);
+  const cheatSocketRef = useRef<WebSocket | null>(null);
+  const videoElRef = useRef<HTMLVideoElement | null>(null);
 
   const lastUserResponseRef = useRef<HTMLDivElement | null>(null);
 
@@ -190,9 +196,150 @@ function Call({ interview }: InterviewProps) {
       setLoading(true);
       webClient.stopCall();
       setIsEnded(true);
+      stopRecording();
       setLoading(false);
     } else {
       setIsEnded(true);
+      stopRecording();
+    }
+  };
+
+  const startRecording = async () => {
+    try {
+      // Request camera + mic
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true,
+      });
+      mediaStreamRef.current = stream;
+
+      // Optional local preview (hidden)
+      if (videoElRef.current) {
+        videoElRef.current.srcObject = stream;
+        // Do not autoplay with sound to avoid echo; keep muted
+        videoElRef.current.muted = true;
+        void videoElRef.current.play().catch(() => void 0);
+      }
+
+      let mimeType = "video/webm;codecs=vp8,opus";
+      if (!MediaRecorder.isTypeSupported(mimeType)) {
+        mimeType = "video/webm";
+      }
+
+      const recorder = new MediaRecorder(stream, { mimeType });
+      mediaRecorderRef.current = recorder;
+      recordedChunksRef.current = [];
+
+      // Optional realtime streaming via WebSocket
+      const wsUrl = process.env.NEXT_PUBLIC_CHEAT_WS_URL;
+      if (wsUrl && !cheatSocketRef.current) {
+        try {
+          cheatSocketRef.current = new WebSocket(wsUrl);
+        } catch (e) {
+          console.error("Failed to open cheat detection socket", e);
+        }
+      }
+
+      recorder.ondataavailable = async (event: BlobEvent) => {
+        if (!event.data || event.data.size === 0) return;
+        recordedChunksRef.current.push(event.data);
+
+        // Stream chunk if socket is open
+        const socket = cheatSocketRef.current;
+        if (socket && socket.readyState === WebSocket.OPEN) {
+          try {
+            const buf = await event.data.arrayBuffer();
+            socket.send(buf);
+          } catch (e) {
+            console.error("Failed sending chunk to cheat socket", e);
+          }
+        }
+      };
+
+      recorder.onstop = async () => {
+        // Close socket
+        if (cheatSocketRef.current) {
+          try {
+            cheatSocketRef.current.close();
+          } catch {}
+          cheatSocketRef.current = null;
+        }
+
+        // Save full recording locally
+        const blob = new Blob(recordedChunksRef.current, { type: recorder.mimeType });
+        const call = callIdRef.current || "no-call-id";
+        const ts = new Date().toISOString().replace(/[:.]/g, "-");
+        const filename = `interview-${interview?.id || "unknown"}-${call}-${ts}.webm`;
+
+        const uploadUrl = process.env.NEXT_PUBLIC_CHEAT_UPLOAD_URL;
+        if (uploadUrl) {
+          try {
+            const form = new FormData();
+            form.append("file", blob, filename);
+            form.append("interview_id", String(interview?.id || ""));
+            form.append("call_id", String(call));
+            form.append("email", String(email || ""));
+            form.append("name", String(name || ""));
+            form.append("mime_type", recorder.mimeType || "video/webm");
+
+            const res = await fetch(uploadUrl, {
+              method: "POST",
+              body: form,
+            });
+            if (!res.ok) throw new Error(`Upload failed: ${res.status}`);
+            toast.success("Interview recording uploaded for analysis.");
+          } catch (e) {
+            console.error("Upload failed, falling back to download.", e);
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+            toast.error("Upload failed. Saved recording locally.");
+          }
+        } else {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          URL.revokeObjectURL(url);
+        }
+      };
+
+      recorder.start(1000); // gather chunks every 1s
+    } catch (err) {
+      console.error("Failed to start recording", err);
+      toast.error("Failed to access camera/microphone for recording.");
+    }
+  };
+
+  const stopRecording = () => {
+    try {
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+        mediaRecorderRef.current.stop();
+      }
+    } catch {}
+
+    if (mediaStreamRef.current) {
+      mediaStreamRef.current.getTracks().forEach((t) => {
+        try {
+          t.stop();
+        } catch {}
+      });
+      mediaStreamRef.current = null;
+    }
+
+    if (cheatSocketRef.current && cheatSocketRef.current.readyState === WebSocket.OPEN) {
+      try {
+        cheatSocketRef.current.close();
+      } catch {}
+      cheatSocketRef.current = null;
     }
   };
 
@@ -228,8 +375,13 @@ function Call({ interview }: InterviewProps) {
           .catch(console.error);
         setIsCalling(true);
         setIsStarted(true);
-
+        
         setCallId(registerCallResponse?.data?.registerCallResponse?.call_id);
+        callIdRef.current = registerCallResponse?.data?.registerCallResponse?.call_id || "";
+
+        // Begin local recording
+        await startRecording();
+
 
         const response = await createResponse({
           interview_id: interview.id,
@@ -272,6 +424,7 @@ function Call({ interview }: InterviewProps) {
       };
 
       updateInterview();
+      stopRecording();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isEnded]);
