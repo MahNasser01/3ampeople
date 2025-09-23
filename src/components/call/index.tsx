@@ -59,6 +59,14 @@ type transcriptType = {
   content: string;
 };
 
+function addMinutesToNow(mins: number): Date {
+  const newMins =  Number(mins) * 60;
+  const nMin = newMins - 30;
+  const now = new Date();
+  const futureTime = new Date(now.getTime() + nMin * 1000); // 60000 ms in a minute
+  return futureTime;
+}
+
 function Call({ interview }: InterviewProps) {
   const { createResponse } = useResponses();
   const [lastInterviewerResponse, setLastInterviewerResponse] =
@@ -365,6 +373,8 @@ function Call({ interview }: InterviewProps) {
       name: name || "not provided",
       email,
       interview_id: interview?.id,
+      end_time: addMinutesToNow(+interview?.time_duration || 1).toISOString(),
+      current_time: new Date().toISOString(),
     };
     setLoading(true);
 
