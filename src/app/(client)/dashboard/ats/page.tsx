@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ATSApplicant, ATSStatus, ATSStats } from "@/types/ats";
 import { getATSService } from "@/services/ats.service";
-import { Mail, Search, Filter, Users, TrendingUp, Clock, CheckCircle, XCircle } from "lucide-react";
+import { Mail, Search, Users, TrendingUp, Clock, CheckCircle, XCircle } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 
 function ATSPage() {

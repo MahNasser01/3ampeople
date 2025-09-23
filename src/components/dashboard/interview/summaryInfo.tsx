@@ -32,7 +32,7 @@ function InfoTooltip({ content }: { content: string }) {
       <Tooltip>
         <TooltipTrigger>
           <Info
-            className="h-2 w-2 text-orange-500 inline-block ml-0 align-super font-bold"
+            className="h-2 w-2 text-primary-500 inline-block ml-0 align-super font-bold"
             strokeWidth={2.5}
           />
         </TooltipTrigger>
@@ -151,12 +151,16 @@ function SummaryInfo({ responses, interview }: SummaryProps) {
       }
 
       totalDuration += response.duration;
-      if (
-        Object.values(CandidateStatus).includes(
-          response.candidate_status as CandidateStatus,
-        )
-      ) {
+      
+      // Count candidate status - handle null/undefined/empty as NO_STATUS
+      if (response.candidate_status && 
+          Object.values(CandidateStatus).includes(
+            response.candidate_status as CandidateStatus,
+          )) {
         statusCounter[response.candidate_status as CandidateStatus]++;
+      } else {
+        // Count as NO_STATUS if status is null, undefined, empty, or not a valid enum value
+        statusCounter[CandidateStatus.NO_STATUS]++;
       }
     });
 
@@ -173,14 +177,14 @@ function SummaryInfo({ responses, interview }: SummaryProps) {
   return (
     <div className="h-screen z-[10] mx-4">
       {responses.length > 0 ? (
-        <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-3xl min-h-[120px] p-6 border border-orange-200 shadow-xl">
+        <div className="bg-gradient-to-br from-primary-50 to-primary-100 rounded-3xl min-h-[120px] p-6 border border-primary-200 shadow-xl">
           <div className="flex flex-row gap-4 justify-between items-center mb-6">
             <div className="flex flex-col gap-1">
               <h2 className="text-2xl font-bold text-gray-800">Overall Analysis</h2>
-              <div className="w-12 h-1 bg-gradient-to-r from-orange-400 to-orange-600 rounded-full"></div>
+              <div className="w-12 h-1 bg-gradient-to-r from-primary-400 to-primary-600 rounded-full" />
             </div>
-            <div className="flex items-center gap-3 bg-white/70 backdrop-blur-sm px-4 py-2 rounded-full border border-orange-200">
-              <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-orange-300">
+            <div className="flex items-center gap-3 bg-white/70 backdrop-blur-sm px-4 py-2 rounded-full border border-primary-200">
+              <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-primary-300">
                 {interviewer?.image && (
                   <Image
                     src={interviewer.image}
@@ -197,15 +201,15 @@ function SummaryInfo({ responses, interview }: SummaryProps) {
               </div>
             </div>
           </div>
-          <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-4 mb-6 border border-orange-200">
+          <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-4 mb-6 border border-primary-200">
             <p className="text-sm text-gray-700 leading-relaxed">
               <span className="font-semibold text-gray-800">Interview Description:</span>{" "}
               {interview?.description}
             </p>
           </div>
-          <div className="flex flex-col gap-1 my-2 mt-4 mx-2 p-6 rounded-3xl bg-white/80 backdrop-blur-sm shadow-lg border border-orange-100">
+          <div className="flex flex-col gap-1 my-2 mt-4 mx-2 p-6 rounded-3xl bg-white/80 backdrop-blur-sm shadow-lg border border-primary-100">
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
+              <div className="w-2 h-2 bg-primary-400 rounded-full" />
               <h3 className="text-lg font-semibold text-gray-800">Response Data</h3>
             </div>
             <ScrollArea className="h-[250px]">
@@ -214,31 +218,31 @@ function SummaryInfo({ responses, interview }: SummaryProps) {
           </div>
           <div className="flex flex-row gap-6 my-2 justify-center">
             <div className="flex flex-col gap-4">
-              <div className="flex flex-col gap-3 my-2 mt-4 mx-2 p-6 rounded-3xl bg-white/80 backdrop-blur-sm shadow-lg max-w-[400px] border border-orange-100">
+              <div className="flex flex-col gap-3 my-2 mt-4 mx-2 p-6 rounded-3xl bg-white/80 backdrop-blur-sm shadow-lg max-w-[400px] border border-primary-100">
                 <div className="flex flex-row items-center justify-center gap-2 font-semibold mb-2 text-[16px] text-gray-700">
-                  <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center">
-                    <span className="text-orange-600 text-sm">⏱️</span>
+                  <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center">
+                    <span className="text-primary-600 text-sm">⏱️</span>
                   </div>
                   Average Duration
                   <InfoTooltip content="Average time users took to complete an interview" />
                 </div>
                 <div className="flex items-center justify-center">
-                  <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-3 rounded-2xl shadow-md">
+                  <div className="bg-gradient-to-r from-primary-500 to-primary-600 text-white px-6 py-3 rounded-2xl shadow-md">
                     <p className="text-2xl font-bold">
                       {convertSecondstoMMSS(totalDuration / responses.length)}
                     </p>
                   </div>
                 </div>
               </div>
-              <div className="flex flex-col items-center justify-center gap-3 mx-2 p-6 rounded-3xl bg-white/80 backdrop-blur-sm shadow-lg max-w-[360px] border border-orange-100">
+              <div className="flex flex-col items-center justify-center gap-3 mx-2 p-6 rounded-3xl bg-white/80 backdrop-blur-sm shadow-lg max-w-[360px] border border-primary-100">
                 <div className="flex flex-row gap-2 font-semibold mb-2 text-[16px] mx-auto text-center text-gray-700">
-                  <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center">
-                    <span className="text-orange-600 text-sm">📊</span>
+                  <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center">
+                    <span className="text-primary-600 text-sm">📊</span>
                   </div>
                   Interview Completion Rate
                   <InfoTooltip content="Percentage of interviews completed successfully" />
                 </div>
-                <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-3 rounded-2xl shadow-md">
+                <div className="bg-gradient-to-r from-primary-500 to-primary-600 text-white px-6 py-3 rounded-2xl shadow-md">
                   <p className="text-2xl font-bold">
                     {Math.round(
                       (completedInterviews / responses.length) * 10000,
@@ -248,10 +252,10 @@ function SummaryInfo({ responses, interview }: SummaryProps) {
                 </div>
               </div>
             </div>
-            <div className="flex flex-col gap-3 my-2 mt-4 mx-2 p-6 rounded-3xl bg-white/80 backdrop-blur-sm shadow-lg max-w-[360px] border border-orange-100">
+            <div className="flex flex-col gap-3 my-2 mt-4 mx-2 p-6 rounded-3xl bg-white/80 backdrop-blur-sm shadow-lg max-w-[360px] border border-primary-100">
               <div className="flex flex-row gap-3 text-[16px] font-bold mb-4 mx-auto items-center">
-                <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center">
-                  <SmileIcon className="w-4 h-4 text-orange-600" />
+                <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center">
+                  <SmileIcon className="w-4 h-4 text-primary-600" />
                 </div>
                 <span className="text-gray-700">Candidate Sentiment</span>
                 <InfoTooltip content="Distribution of user sentiments during interviews" />
@@ -296,17 +300,17 @@ function SummaryInfo({ responses, interview }: SummaryProps) {
                 height={120}
               />
             </div>
-            <div className="flex flex-col gap-3 my-2 mt-4 mx-2 p-6 rounded-3xl bg-white/80 backdrop-blur-sm shadow-lg border border-orange-100">
+            <div className="flex flex-col gap-3 my-2 mt-4 mx-2 p-6 rounded-3xl bg-white/80 backdrop-blur-sm shadow-lg border border-primary-100">
               <div className="flex flex-row gap-3 text-[16px] font-bold mx-auto mb-2 items-center">
-                <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center">
-                  <UserCircleIcon className="w-4 h-4 text-orange-600" />
+                <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center">
+                  <UserCircleIcon className="w-4 h-4 text-primary-600" />
                 </div>
                 <span className="text-gray-700">Candidate Status</span>
                 <InfoTooltip content="Breakdown of the candidate selection status" />
               </div>
               <div className="text-center mb-3">
-                <div className="inline-flex items-center gap-2 bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-sm font-medium">
-                  <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
+                <div className="inline-flex items-center gap-2 bg-primary-100 text-primary-700 px-3 py-1 rounded-full text-sm font-medium">
+                  <span className="w-2 h-2 bg-primary-500 rounded-full" />
                   Total Responses: {totalResponses}
                 </div>
               </div>
@@ -374,7 +378,7 @@ function SummaryInfo({ responses, interview }: SummaryProps) {
         <div className="w-[85%] h-[60%] flex flex-col items-center justify-center">
           <div className="flex flex-col items-center gap-6">
             <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-orange-400 to-orange-600 rounded-full blur-xl opacity-20"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-primary-400 to-primary-600 rounded-full blur-xl opacity-20" />
               <Image
                 src="/no-responses.png"
                 alt="logo"
