@@ -334,7 +334,7 @@ function CallInfo({
                     Interview Recording
                   </p>
 
-                  <div className="flex flex-col md:flex-row gap-6">
+                  <div className="flex flex-col md:flex-center">
                     {/* 🎙️ Audio Recording */}
                     {call?.recording_url && (
                       <div className="flex flex-col items-center bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 rounded-2xl shadow-md p-4 w-full md:w-1/2">
@@ -342,20 +342,6 @@ function CallInfo({
                           Audio
                         </p>
                         <CustomAudioPlayer src={call?.recording_url} />
-                      </div>
-                    )}
-
-                    {/* 🎥 Video Recording */}
-                    {videoUrl && (
-                      <div className="flex flex-col items-center bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 rounded-2xl shadow-md p-4 w-full md:w-1/2">
-                        <p className="font-medium text-sm mb-3 text-orange-700">
-                          Video
-                        </p>
-                        <video
-                          src={videoUrl}
-                          className="w-full max-h-72 rounded-xl border border-orange-300 shadow-lg accent-orange-500"
-                          controls
-                        />
                       </div>
                     )}
                   </div>
@@ -456,48 +442,6 @@ function CallInfo({
                       ) : (
                         analytics?.communication.feedback
                       )}
-                    </div>
-                  </div>
-                </div>
-              )}
-              {cheatResult && (
-                <div className="flex flex-col gap-4 text-sm p-6 rounded-3xl bg-white/80 backdrop-blur-sm border border-orange-100 shadow-lg">
-                  <div className="flex flex-row gap-2 align-middle">
-                    <p className="font-medium my-auto text-xl">Proctoring</p>
-                  </div>
-                  <div className="flex flex-col gap-3">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium">
-                        Mobile Detected:
-                      </span>
-                      <span
-                        className={`${
-                          cheatResult.mobile_detected === 1
-                            ? "text-red-500"
-                            : "text-green-500"
-                        } text-xl`}
-                      >
-                        ●
-                      </span>
-                      <span className="text-sm">
-                        {cheatResult.mobile_detected > 5 ? "Yes" : "No"}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium">
-                        Gaze Direction:
-                      </span>
-                      <span className="text-sm">
-                        {cheatResult.gaze_direction}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium">
-                        Head Direction:
-                      </span>
-                      <span className="text-sm">
-                        {cheatResult.head_direction}
-                      </span>
                     </div>
                   </div>
                 </div>

@@ -12,54 +12,56 @@ export async function GET(res: NextRequest) {
   logger.info("create-interviewer request received");
 
   try {
+    // Get existing agents
+    const existingAgents = await retellClient.agent.list(); // adjust based on actual API
+    const existingAgentNames = existingAgents.map((a: any) => a.agent_name);
+
+    // Create model
     const newModel = await retellClient.llm.create({
-      model: "gpt-5-mini",
+      model: "claude-4.0",
       general_prompt: RETELL_AGENT_GENERAL_PROMPT,
       general_tools: [
         {
           type: "end_call",
           name: "end_call_1",
           description:
-            "End the call if the user uses goodbye phrases such as 'bye,' 'goodbye,' or 'have a nice day.' ",
+            "Automatically terminate the call when the elapsed time reaches or exceeds {{END_TIME}}, calculated from the initial start time of {{CURRENT_TIME}}",
         },
       ],
     });
 
-    // Create Lisa
-    const newFirstAgent = await retellClient.agent.create({
-      response_engine: { llm_id: newModel.llm_id, type: "retell-llm" },
-      voice_id: "11labs-Chloe",
-      agent_name: "Lisa",
-    });
+    const response: any = {};
 
-    const newInterviewer = await InterviewerService.createInterviewer({
-      agent_id: newFirstAgent.agent_id,
-      ...INTERVIEWERS.LISA,
-    });
+    // Helper function to create agent if not exists
+    const createAgentIfNotExists = async (agentName: string, voiceId: string, interviewerData: any) => {
+      if (existingAgentNames.includes(agentName)) {
+        logger.info(`Agent "${agentName}" already exists. Skipping creation.`);
+        return null;
+      }
 
-    // Create Bob
-    const newSecondAgent = await retellClient.agent.create({
-      response_engine: { llm_id: newModel.llm_id, type: "retell-llm" },
-      voice_id: "11labs-Brian",
-      agent_name: "Bob",
-    });
+      const agent = await retellClient.agent.create({
+        response_engine: { llm_id: newModel.llm_id, type: "retell-llm" },
+        voice_id: voiceId,
+        agent_name: agentName,
+      });
 
-    const newSecondInterviewer = await InterviewerService.createInterviewer({
-      agent_id: newSecondAgent.agent_id,
-      ...INTERVIEWERS.BOB,
-    });
+      const interviewer = await InterviewerService.createInterviewer({
+        agent_id: agent.agent_id,
+        ...interviewerData,
+      });
 
-    logger.info("");
+      return interviewer;
+    };
 
-    return NextResponse.json(
-      {
-        newInterviewer,
-        newSecondInterviewer,
-      },
-      { status: 200 }
-    );
+    // Create Alaa
+    response.newInterviewer = await createAgentIfNotExists("Alaa", "11labs-Chloe", INTERVIEWERS.LISA);
+
+    // Create Noman
+    response.newSecondInterviewer = await createAgentIfNotExists("Noman", "11labs-Brian", INTERVIEWERS.BOB);
+
+    return NextResponse.json(response, { status: 200 });
   } catch (error) {
-    logger.error("Error creating interviewers:");
+    logger.error("Error creating interviewers:", error);
 
     return NextResponse.json(
       { error: "Failed to create interviewers" },

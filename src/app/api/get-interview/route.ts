@@ -1,15 +1,14 @@
-import { nanoid } from "nanoid";
 import { NextResponse } from "next/server";
-import { InterviewService } from "@/services/interviews.service";
 import { logger } from "@/lib/logger";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 
+const supabase = createClientComponentClient();
+
 export async function GET(req: Request, res: Response) {
   try {
-    const supabase = createClientComponentClient();
     const { data, error } = await supabase
       .from("interview")
-      .select("id,name")
+      .select("*")
       .order("created_at", { ascending: false });
     if (!error && data) {
       return NextResponse.json(data, { status: 200 });
