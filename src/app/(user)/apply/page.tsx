@@ -1,34 +1,44 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+
+export const dynamic = "force-dynamic";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 
-
 export default function ApplyPage() {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [positions, setPositions] = useState<Array<{ id: string; name: string }>>([]);
+  const [positions, setPositions] = useState<
+    Array<{ id: string; name: string }>
+  >([]);
   const [loadingPositions, setLoadingPositions] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchPositions = async () => {
       try {
-        const res = await fetch("/api/get-interview");
+        const res = await fetch("/api/get-interview", {
+          cache: "no-store",
+          headers: {
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            Pragma: "no-cache",
+            Expires: "0",
+          },
+        });
         const data = await res.json();
-        
+
         if (!res.ok) {
           throw new Error(data?.error || "Failed to fetch positions");
         }
-        
+
         const validPositions = data
           .filter((x: any) => !!x?.name && !!x?.id && x?.is_active !== false)
           .map((x: any) => ({ id: x.id as string, name: x.name as string }));
-          
+
         setPositions(validPositions);
       } catch (err: any) {
         console.error("Failed to load job positions:", err);
@@ -37,7 +47,7 @@ export default function ApplyPage() {
         setLoadingPositions(false);
       }
     };
-    
+
     fetchPositions();
   }, []);
 
@@ -49,7 +59,7 @@ export default function ApplyPage() {
     try {
       setError(null);
       setIsSubmitting(true);
-      
+
       const res = await fetch("/api/apply", {
         method: "POST",
         body: formData,
@@ -60,18 +70,18 @@ export default function ApplyPage() {
         throw new Error(data?.error || "Submission failed");
       }
 
-      toast({ 
-        title: "Application submitted successfully!", 
-        description: "We received your application and will review it soon." 
+      toast({
+        title: "Application submitted successfully!",
+        description: "We received your application and will review it soon.",
       });
       form.reset();
     } catch (err: any) {
       const message = err?.message || "Something went wrong";
       setError(message);
-      toast({ 
-        title: "Error", 
-        description: message, 
-        variant: "destructive" 
+      toast({
+        title: "Error",
+        description: message,
+        variant: "destructive",
       });
     } finally {
       setIsSubmitting(false);
@@ -82,7 +92,9 @@ export default function ApplyPage() {
     <div className="flex min-h-[calc(100vh-80px)] items-center justify-center px-4 py-10">
       <div className="w-full max-w-2xl rounded-xl border bg-background p-6 shadow-sm">
         <h1 className="text-2xl font-semibold">Apply</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Submit your details and resume. We'll be in touch soon.</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Submit your details and resume. We'll be in touch soon.
+        </p>
         <Separator className="my-6" />
         {error && (
           <div className="mb-4 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
@@ -97,24 +109,33 @@ export default function ApplyPage() {
               <div className="relative flex items-center justify-center">
                 {/* Loading Time Image */}
                 <div className="relative">
-                  <img 
-                    src="/Loading-Time.png" 
-                    alt="Loading" 
+                  <img
+                    src="/Loading-Time.png"
+                    alt="Loading"
                     className="w-24 h-24 object-contain animate-pulse"
                   />
                   {/* Spinning ring around the image */}
-                  <div className="absolute inset-0 w-24 h-24 border-4 border-transparent border-t-blue-500 border-r-blue-500 rounded-full animate-spin"></div>
+                  <div className="absolute inset-0 w-24 h-24 border-4 border-transparent border-t-primary-500 border-r-primary-500 rounded-full animate-spin"></div>
                 </div>
               </div>
               <div className="text-center space-y-2">
-                <h3 className="text-xl font-bold text-gray-900">Processing Application</h3>
+                <h3 className="text-xl font-bold text-gray-900">
+                  Processing Application
+                </h3>
                 <p className="text-sm text-gray-600 leading-relaxed">
-                  Please wait while we analyze your resume and process your application...
+                  Please wait while we analyze your resume and process your
+                  application...
                 </p>
                 <div className="flex items-center justify-center space-x-1 mt-3">
                   <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                  <div
+                    className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"
+                    style={{ animationDelay: "0.1s" }}
+                  ></div>
+                  <div
+                    className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"
+                    style={{ animationDelay: "0.2s" }}
+                  ></div>
                 </div>
               </div>
             </div>
@@ -161,10 +182,14 @@ export default function ApplyPage() {
                 defaultValue=""
               >
                 <option value="" disabled>
-                  {loadingPositions ? "Loading positions..." : "Select a position"}
+                  {loadingPositions
+                    ? "Loading positions..."
+                    : "Select a position"}
                 </option>
                 {positions.length === 0 && !loadingPositions && (
-                  <option value="" disabled>No positions available</option>
+                  <option value="" disabled>
+                    No positions available
+                  </option>
                 )}
                 {positions.map((p) => (
                   <option key={p.id} value={`${p.id}-${p.name}`}>
@@ -189,25 +214,25 @@ export default function ApplyPage() {
 
           <div className="flex flex-col gap-2">
             <Label htmlFor="cover_letter">Short cover letter (optional)</Label>
-            <Textarea 
-              id="cover_letter" 
-              name="cover_letter" 
-              placeholder="Briefly tell us why you're a great fit" 
+            <Textarea
+              id="cover_letter"
+              name="cover_letter"
+              placeholder="Briefly tell us why you're a great fit"
               disabled={isSubmitting}
-              className="min-h-28 disabled:opacity-50 disabled:cursor-not-allowed" 
+              className="min-h-28 disabled:opacity-50 disabled:cursor-not-allowed"
             />
           </div>
 
           <div className="flex flex-col gap-2">
             <Label htmlFor="resume">Resume (PDF)</Label>
-            <input 
-              id="resume" 
-              name="resume" 
-              type="file" 
-              accept="application/pdf" 
-              required 
+            <input
+              id="resume"
+              name="resume"
+              type="file"
+              accept="application/pdf"
+              required
               disabled={isSubmitting}
-              className="text-sm disabled:opacity-50 disabled:cursor-not-allowed" 
+              className="text-sm disabled:opacity-50 disabled:cursor-not-allowed"
             />
           </div>
 
@@ -228,5 +253,3 @@ export default function ApplyPage() {
     </div>
   );
 }
-
-

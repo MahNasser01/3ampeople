@@ -244,7 +244,7 @@ function ATSPage() {
                     </p>
                     <p className="text-2xl font-bold">{stats.total}</p>
                   </div>
-                  <Users className="h-8 w-8 text-blue-600" />
+                  <Users className="h-8 w-8 text-primary-600" />
                 </div>
               </CardContent>
             </Card>
@@ -353,7 +353,7 @@ function ATSPage() {
                   <div>
                     <CardTitle className="text-lg">{applicant.name}</CardTitle>
                     <p className="text-sm text-gray-600">{applicant.email}</p>
-                    <p className="text-sm font-medium text-blue-600">
+                    <p className="text-sm font-medium text-primary-600">
                       {applicant.position}
                     </p>
                   </div>
@@ -399,7 +399,7 @@ function ATSPage() {
                   </div>
 
                   <div className="text-sm text-gray-600">
-                    <p>Experience: {applicant.experience}</p>
+                    {/* <p>Experience: {applicant.experience}</p> */}
                     <p>Education: {applicant.education}</p>
                     <p>Applied: {applicant.appliedAt.toLocaleDateString()}</p>
                   </div>
