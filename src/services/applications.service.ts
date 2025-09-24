@@ -31,8 +31,35 @@ const createApplication = async (payload: ApplicationInsertPayload) => {
   return data?.id as number | null;
 };
 
+const hasApplicationForInterviewAndEmail = async (
+  interviewId: string,
+  email: string,
+) => {
+  try {
+    const { data, error } = await supabase
+      .from("applications")
+      .select("id")
+      .eq("interview_id", interviewId)
+      .eq("email", email)
+      .maybeSingle();
+
+    if (error && error.code !== "PGRST116") {
+      console.error("Error checking application existence:", error);
+
+      return false;
+    }
+
+    return Boolean(data?.id);
+  } catch (err) {
+    console.error("Unexpected error checking application existence:", err);
+
+    return false;
+  }
+};
+
 export const ApplicationsService = {
   createApplication,
+  hasApplicationForInterviewAndEmail,
 };
 
 

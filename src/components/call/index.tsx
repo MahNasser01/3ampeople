@@ -37,6 +37,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { InterviewerService } from "@/services/interviewers.service";
+import { ApplicationsService } from "@/services/applications.service";
 import { APP_COLORS } from "@/lib/constants";
 
 const webClient = new RetellWebClient();
@@ -87,6 +88,7 @@ function Call({ interview }: InterviewProps) {
   const [isFeedbackSubmitted, setIsFeedbackSubmitted] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [interviewerImg, setInterviewerImg] = useState("");
+  const [eligibilityError, setEligibilityError] = useState<string>("");
   const [interviewTimeDuration, setInterviewTimeDuration] =
     useState<string>("1");
   const [time, setTime] = useState(0);
@@ -177,6 +179,8 @@ function Call({ interview }: InterviewProps) {
     if (testEmail(email)) {
       setIsValidEmail(true);
     }
+    // Clear any eligibility error when the email changes
+    setEligibilityError("");
   }, [email]);
 
   useEffect(() => {
@@ -365,9 +369,22 @@ function Call({ interview }: InterviewProps) {
     const oldUserEmails: string[] = (
       await ResponseService.getAllEmails(interview.id)
     ).map((item) => item.email);
+    // Check applicant eligibility: must have an application with matching interview_id + email
+    const isApplicant = await ApplicationsService.hasApplicationForInterviewAndEmail(
+      interview.id,
+      email,
+    );
+
     const OldUser =
       oldUserEmails.includes(email) ||
       (interview?.respondents && !interview?.respondents.includes(email));
+
+    if (!isApplicant) {
+      setEligibilityError("This email is not registered for this interview.");
+      toast.error("This email is not registered for this interview.");
+      setLoading(false);
+      return;
+    }
 
     if (OldUser) {
       setIsOldUser(true);
@@ -517,6 +534,11 @@ function Call({ interview }: InterviewProps) {
                           onChange={(e) => setEmail(e.target.value)}
                         />
                       </div>
+                      {eligibilityError && (
+                        <div className="text-red-600 text-xs text-center -mt-1">
+                          {eligibilityError}
+                        </div>
+                      )}
                       <div className="flex justify-center">
                         <input
                           value={name}
