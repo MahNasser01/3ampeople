@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 
 export const dynamic = "force-dynamic";
 import { useToast } from "@/components/ui/use-toast";
@@ -21,21 +22,18 @@ export default function ApplyPage() {
   useEffect(() => {
     const fetchPositions = async () => {
       try {
-        const res = await fetch("/api/get-interview", {
-          cache: "no-store",
-          headers: {
-            "Cache-Control": "no-cache, no-store, must-revalidate",
-            Pragma: "no-cache",
-            Expires: "0",
-          },
-        });
-        const data = await res.json();
+        const supabase = createClientComponentClient();
 
-        if (!res.ok) {
-          throw new Error(data?.error || "Failed to fetch positions");
+        const { data, error } = await supabase
+          .from("interview")
+          .select("*")
+          .order("created_at", { ascending: false });
+
+        if (error) {
+          throw new Error(error.message || "Failed to fetch positions");
         }
 
-        const validPositions = data
+        const validPositions = (data || [])
           .filter((x: any) => !!x?.name && !!x?.id && x?.is_active !== false)
           .map((x: any) => ({ id: x.id as string, name: x.name as string }));
 
