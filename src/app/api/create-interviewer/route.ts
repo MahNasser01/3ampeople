@@ -11,8 +11,6 @@ const retellClient = new Retell({
 export async function GET(res: NextRequest) {
   logger.info("create-interviewer request received");
 
-  try {
-    // Get existing agents
     const existingAgents = await retellClient.agent.list(); // adjust based on actual API
     const existingAgentNames = existingAgents.map((a: any) => a.agent_name);
 
@@ -60,12 +58,5 @@ export async function GET(res: NextRequest) {
     response.newSecondInterviewer = await createAgentIfNotExists("Noman", "11labs-Brian", INTERVIEWERS.BOB);
 
     return NextResponse.json(response, { status: 200 });
-  } catch (error) {
-    logger.error("Error creating interviewers:", error);
 
-    return NextResponse.json(
-      { error: "Failed to create interviewers" },
-      { status: 500 }
-    );
-  }
 }

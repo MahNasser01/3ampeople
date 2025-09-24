@@ -22,7 +22,6 @@ export interface InterviewBase {
   description: string;
   response_count: bigint;
   jd?: string;
-  interviewerName: string
 }
 
 export interface InterviewDetails {
