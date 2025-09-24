@@ -12,6 +12,8 @@ import { usePathname } from "next/navigation";
 
 const inter = Inter({ subsets: ["latin"] });
 
+export const dynamic = "force-dynamic";
+
 const metadata = {
   title: "3AM",
   description: " AI-powered Interviews",
