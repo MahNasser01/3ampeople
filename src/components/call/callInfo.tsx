@@ -346,6 +346,21 @@ function CallInfo({
                     )}
                   </div>
 
+                  {/* 🎥 Video Recording */}
+                  {videoUrl && (
+                    <div className="flex flex-col items-center bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 rounded-2xl shadow-md p-4 w-full md:w-1/2">
+                      <p className="font-medium text-sm mb-3 text-orange-700">
+                        Video
+                      </p>
+                      <video
+                        src={`${process.env.NEXT_PUBLIC_LIVE_URL}${videoUrl}`}
+                        className="w-full max-h-72 rounded-xl border border-orange-300 shadow-lg accent-orange-500"
+                        controls
+                      />
+                    </div>
+                  )}
+                  
+
                   {/* 📥 Download */}
                   {(videoUrl || call?.recording_url) && (
                     <div className="flex justify-end mt-5">

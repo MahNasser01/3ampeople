@@ -94,10 +94,39 @@ function Call({ interview }: InterviewProps) {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const recordedChunksRef = useRef<Blob[]>([]);
-  const cheatSocketRef = useRef<WebSocket | null>(null);
   const videoElRef = useRef<HTMLVideoElement | null>(null);
+  const chunkBufferRef = useRef<Blob[]>([]);
+  const chunkSizeRef = useRef<number>(0);
+  const CHUNK_SIZE_LIMIT = 2 * 1024 * 1024; // 10 10MB
 
   const lastUserResponseRef = useRef<HTMLDivElement | null>(null);
+
+  const uploadChunk = async (chunkBlob: Blob, isLast: boolean = false) => {
+    try {
+      const form = new FormData();
+      form.append("file", chunkBlob, `chunk-${Date.now()}.webm`);
+      form.append("interview_id", String(interview?.id || ""));
+      form.append("call_id", String(callIdRef.current || ""));
+      form.append("email", String(email || ""));
+      form.append("name", String(name || ""));
+      form.append("mime_type", "video/webm");
+      form.append("is_last_chunk", String(isLast));
+
+      const uploadUrl = process.env.NEXT_PUBLIC_CHEAT_UPLOAD_URL || "/api/upload-video";
+      const res = await fetch(uploadUrl, {
+        method: "POST",
+        body: form,
+      });
+      
+      if (!res.ok) {
+        throw new Error(`Upload failed: ${res.status}`);
+      }
+      
+      console.log(`Chunk uploaded successfully${isLast ? ' (final chunk)' : ''}`);
+    } catch (e) {
+      console.error("Chunk upload failed:", e);
+    }
+  };
 
   const handleFeedbackSubmit = async (
     formData: Omit<FeedbackData, "interview_id">
@@ -238,15 +267,9 @@ function Call({ interview }: InterviewProps) {
       mediaRecorderRef.current = recorder;
       recordedChunksRef.current = [];
 
-      // Optional realtime streaming via WebSocket
-      const wsUrl = process.env.NEXT_PUBLIC_CHEAT_WS_URL;
-      if (wsUrl && !cheatSocketRef.current) {
-        try {
-          cheatSocketRef.current = new WebSocket(wsUrl);
-        } catch (e) {
-          console.error("Failed to open cheat detection socket", e);
-        }
-      }
+      // Initialize chunk buffer for HTTP uploads
+      chunkBufferRef.current = [];
+      chunkSizeRef.current = 0;
 
       recorder.ondataavailable = async (event: BlobEvent) => {
         if (!event.data || event.data.size === 0) {
@@ -254,28 +277,29 @@ function Call({ interview }: InterviewProps) {
         }
         recordedChunksRef.current.push(event.data);
 
-        // Stream chunk if socket is open
-        const socket = cheatSocketRef.current;
-        if (socket && socket.readyState === WebSocket.OPEN) {
-          try {
-            const buf = await event.data.arrayBuffer();
-            socket.send(buf);
-          } catch (e) {
-            console.error("Failed sending chunk to cheat socket", e);
-          }
+        // Add to chunk buffer
+        chunkBufferRef.current.push(event.data);
+        chunkSizeRef.current += event.data.size;
+
+        // Upload chunk if it reaches 10MB limit
+        if (chunkSizeRef.current >= CHUNK_SIZE_LIMIT) {
+          const chunkBlob = new Blob(chunkBufferRef.current, { type: mimeType });
+          await uploadChunk(chunkBlob, false);
+          
+          // Reset buffer
+          chunkBufferRef.current = [];
+          chunkSizeRef.current = 0;
         }
       };
 
       recorder.onstop = async () => {
-        // Close socket
-        if (cheatSocketRef.current) {
-          try {
-            cheatSocketRef.current.close();
-          } catch {}
-          cheatSocketRef.current = null;
+        // Upload final chunk if there's remaining data
+        if (chunkBufferRef.current.length > 0) {
+          const finalChunkBlob = new Blob(chunkBufferRef.current, { type: mimeType });
+          await uploadChunk(finalChunkBlob, true);
         }
 
-        // Save full recording locally
+        // Save full recording locally as backup
         const blob = new Blob(recordedChunksRef.current, {
           type: recorder.mimeType,
         });
@@ -285,47 +309,17 @@ function Call({ interview }: InterviewProps) {
           interview?.id || "unknown"
         }-${call}-${ts}.webm`;
 
-        const uploadUrl = process.env.NEXT_PUBLIC_CHEAT_UPLOAD_URL;
-        if (uploadUrl) {
-          try {
-            const form = new FormData();
-            form.append("file", blob, filename);
-            form.append("interview_id", String(interview?.id || ""));
-            form.append("call_id", String(call));
-            form.append("email", String(email || ""));
-            form.append("name", String(name || ""));
-            form.append("mime_type", recorder.mimeType || "video/webm");
-
-            const res = await fetch(uploadUrl, {
-              method: "POST",
-              body: form,
-            });
-            if (!res.ok) {
-              throw new Error(`Upload failed: ${res.status}`);
-            }
-            toast.success("Interview recording uploaded for analysis.");
-          } catch (e) {
-            console.error("Upload failed, falling back to download.", e);
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            URL.revokeObjectURL(url);
-            toast.error("Upload failed. Saved recording locally.");
-          }
-        } else {
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = filename;
-          document.body.appendChild(a);
-          a.click();
-          a.remove();
-          URL.revokeObjectURL(url);
-        }
+        // Download as backup
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        
+        toast.success("Interview recording uploaded for analysis.");
       };
 
       recorder.start(1000); // gather chunks every 1s
@@ -352,16 +346,6 @@ function Call({ interview }: InterviewProps) {
         } catch {}
       });
       mediaStreamRef.current = null;
-    }
-
-    if (
-      cheatSocketRef.current &&
-      cheatSocketRef.current.readyState === WebSocket.OPEN
-    ) {
-      try {
-        cheatSocketRef.current.close();
-      } catch {}
-      cheatSocketRef.current = null;
     }
   };
 
@@ -407,7 +391,7 @@ function Call({ interview }: InterviewProps) {
           registerCallResponse?.data?.registerCallResponse?.call_id || "";
 
         // Begin local recording
-        // await startRecording();
+        await startRecording();
 
         const response = await createResponse({
           interview_id: interview.id,
