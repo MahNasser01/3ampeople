@@ -34,6 +34,23 @@ export async function POST(req: Request) {
 
     const supabase = createClientComponentClient();
 
+    // Check if this email has already applied for this interview
+    const { data: existingApplication, error: checkError } = await supabase
+      .from("applications")
+      .select("id")
+      .eq("email", email)
+      .eq("interview_id", interview_id)
+      .single();
+
+    if (checkError && checkError.code !== "PGRST116") {
+      logger.error("Error checking existing application:", checkError);
+      return NextResponse.json({ error: "Failed to check application status" }, { status: 500 });
+    }
+
+    if (existingApplication) {
+      return NextResponse.json({ error: "You applied for this position before" }, { status: 400 });
+    }
+
     // Upload resume to Supabase Storage (create bucket `resumes` manually or via SQL)
     const arrayBuffer = await resumeFile.arrayBuffer();
     const fileBytes = new Uint8Array(arrayBuffer);

@@ -90,6 +90,37 @@ export default function ApplyPage() {
           </div>
         )}
 
+        {/* Loading overlay */}
+        {isSubmitting && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-xl p-8 flex flex-col items-center space-y-6 shadow-2xl max-w-md mx-4">
+              <div className="relative flex items-center justify-center">
+                {/* Loading Time Image */}
+                <div className="relative">
+                  <img 
+                    src="/Loading-Time.png" 
+                    alt="Loading" 
+                    className="w-24 h-24 object-contain animate-pulse"
+                  />
+                  {/* Spinning ring around the image */}
+                  <div className="absolute inset-0 w-24 h-24 border-4 border-transparent border-t-blue-500 border-r-blue-500 rounded-full animate-spin"></div>
+                </div>
+              </div>
+              <div className="text-center space-y-2">
+                <h3 className="text-xl font-bold text-gray-900">Processing Application</h3>
+                <p className="text-sm text-gray-600 leading-relaxed">
+                  Please wait while we analyze your resume and process your application...
+                </p>
+                <div className="flex items-center justify-center space-x-1 mt-3">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="flex flex-col gap-2">
@@ -99,8 +130,9 @@ export default function ApplyPage() {
                 name="full_name"
                 type="text"
                 required
+                disabled={isSubmitting}
                 placeholder="Jane Doe"
-                className="h-10 rounded-md border bg-transparent px-3 text-sm outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                className="h-10 rounded-md border bg-transparent px-3 text-sm outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </div>
             <div className="flex flex-col gap-2">
@@ -110,8 +142,9 @@ export default function ApplyPage() {
                 name="email"
                 type="email"
                 required
+                disabled={isSubmitting}
                 placeholder="jane@example.com"
-                className="h-10 rounded-md border bg-transparent px-3 text-sm outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                className="h-10 rounded-md border bg-transparent px-3 text-sm outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </div>
           </div>
@@ -123,7 +156,8 @@ export default function ApplyPage() {
                 id="job_position"
                 name="job_position"
                 required
-                className="h-10 rounded-md border bg-transparent px-3 text-sm outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                disabled={isSubmitting || loadingPositions}
+                className="h-10 rounded-md border bg-transparent px-3 text-sm outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 defaultValue=""
               >
                 <option value="" disabled>
@@ -146,25 +180,47 @@ export default function ApplyPage() {
                 name="phone"
                 type="tel"
                 required
+                disabled={isSubmitting}
                 placeholder="+1 555 123 4567"
-                className="h-10 rounded-md border bg-transparent px-3 text-sm outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                className="h-10 rounded-md border bg-transparent px-3 text-sm outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </div>
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label htmlFor="cover_letter">Short cover letter</Label>
-            <Textarea id="cover_letter" name="cover_letter" placeholder="Briefly tell us why you're a great fit" className="min-h-28" />
+            <Label htmlFor="cover_letter">Short cover letter (optional)</Label>
+            <Textarea 
+              id="cover_letter" 
+              name="cover_letter" 
+              placeholder="Briefly tell us why you're a great fit" 
+              disabled={isSubmitting}
+              className="min-h-28 disabled:opacity-50 disabled:cursor-not-allowed" 
+            />
           </div>
 
           <div className="flex flex-col gap-2">
             <Label htmlFor="resume">Resume (PDF)</Label>
-            <input id="resume" name="resume" type="file" accept="application/pdf" required className="text-sm" />
+            <input 
+              id="resume" 
+              name="resume" 
+              type="file" 
+              accept="application/pdf" 
+              required 
+              disabled={isSubmitting}
+              className="text-sm disabled:opacity-50 disabled:cursor-not-allowed" 
+            />
           </div>
 
           <div className="pt-2">
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Submitting..." : "Submit application"}
+            <Button type="submit" disabled={isSubmitting} className="relative">
+              {isSubmitting ? (
+                <>
+                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
+                  Processing...
+                </>
+              ) : (
+                "Submit application"
+              )}
             </Button>
           </div>
         </form>
