@@ -18,7 +18,7 @@ export async function GET(res: NextRequest) {
 
     // Create model
     const newModel = await retellClient.llm.create({
-      model: "claude-4.0",
+      model: "gpt-5",
       general_prompt: RETELL_AGENT_GENERAL_PROMPT,
       general_tools: [
         {
